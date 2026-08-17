@@ -1,0 +1,2 @@
+fn() -> impl Future<Output = Json<Message>> {hello}
+fn() -> impl Future<Output = Json<Message>> {hello}: Handler<_, _>

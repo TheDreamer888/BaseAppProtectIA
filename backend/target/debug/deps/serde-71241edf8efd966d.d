@@ -1,0 +1,14 @@
+/home/thediscipline/projects/BaseAppProtectIA/backend/target/debug/deps/serde-71241edf8efd966d.d: /home/thediscipline/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.229/src/lib.rs /home/thediscipline/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.229/src/integer128.rs /home/thediscipline/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.229/src/private/mod.rs /home/thediscipline/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.229/src/private/de.rs /home/thediscipline/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.229/src/private/ser.rs /home/thediscipline/projects/BaseAppProtectIA/backend/target/debug/build/serde-9e202a7418b624cf/out/private.rs
+
+/home/thediscipline/projects/BaseAppProtectIA/backend/target/debug/deps/libserde-71241edf8efd966d.rlib: /home/thediscipline/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.229/src/lib.rs /home/thediscipline/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.229/src/integer128.rs /home/thediscipline/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.229/src/private/mod.rs /home/thediscipline/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.229/src/private/de.rs /home/thediscipline/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.229/src/private/ser.rs /home/thediscipline/projects/BaseAppProtectIA/backend/target/debug/build/serde-9e202a7418b624cf/out/private.rs
+
+/home/thediscipline/projects/BaseAppProtectIA/backend/target/debug/deps/libserde-71241edf8efd966d.rmeta: /home/thediscipline/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.229/src/lib.rs /home/thediscipline/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.229/src/integer128.rs /home/thediscipline/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.229/src/private/mod.rs /home/thediscipline/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.229/src/private/de.rs /home/thediscipline/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.229/src/private/ser.rs /home/thediscipline/projects/BaseAppProtectIA/backend/target/debug/build/serde-9e202a7418b624cf/out/private.rs
+
+/home/thediscipline/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.229/src/lib.rs:
+/home/thediscipline/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.229/src/integer128.rs:
+/home/thediscipline/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.229/src/private/mod.rs:
+/home/thediscipline/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.229/src/private/de.rs:
+/home/thediscipline/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.229/src/private/ser.rs:
+/home/thediscipline/projects/BaseAppProtectIA/backend/target/debug/build/serde-9e202a7418b624cf/out/private.rs:
+
+# env-dep:OUT_DIR=/home/thediscipline/projects/BaseAppProtectIA/backend/target/debug/build/serde-9e202a7418b624cf/out
