@@ -1,0 +1,6 @@
+packages:
+  - 'frontend'
+  - 'admin'
+  - 'backend'
+  - 'agent'
+  - 'packages/*'
