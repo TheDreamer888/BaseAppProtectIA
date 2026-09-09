@@ -1,51 +1,63 @@
 services:
   postgres:
-    image: postgres:16-alpine
+    image: postgres:16.4-alpine
     restart: unless-stopped
     environment:
-      POSTGRES_USER: protectia
-      POSTGRES_PASSWORD: protectia
-      POSTGRES_DB: protectia
+      POSTGRES_USER: ${POSTGRES_USER:-protectia}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
+      POSTGRES_DB: ${POSTGRES_DB:-protectia}
     ports:
-      - "5432:5432"
+      - "127.0.0.1:5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U protectia"]
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
       interval: 5s
       timeout: 5s
       retries: 10
 
   redis:
-    image: redis:7-alpine
+    image: redis:7.4.2-alpine
     restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes", "--requirepass", "${REDIS_PASSWORD:?Set REDIS_PASSWORD in .env}"]
     ports:
-      - "6379:6379"
+      - "127.0.0.1:6379:6379"
+    volumes:
+      - redis_data:/data
     healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD}", "ping"]
       interval: 5s
       timeout: 5s
       retries: 10
 
   api-python:
-    build: ./services/api-python
+    build:
+      context: ./services/api-python
+      dockerfile: Dockerfile
     restart: unless-stopped
     env_file:
-      - ./services/api-python/.env
+      - path: ./services/api-python/.env
+        required: false
+    environment:
+      ENV: ${ENV:-development}
+      DEBUG: ${DEBUG:-false}
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:5173}
     ports:
-      - "8000:8000"
+      - "127.0.0.1:8000:8000"
     depends_on:
       postgres:
         condition: service_healthy
 
   api-rust:
-    build: ./services/api-rust
+    build:
+      context: ./services/api-rust
+      dockerfile: Dockerfile
     restart: unless-stopped
     environment:
-      DATABASE_URL: postgres://protectia:protectia@postgres:5432/protectia
+      DATABASE_URL: postgres://${POSTGRES_USER:-protectia}:${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}@postgres:5432/${POSTGRES_DB:-protectia}
       PORT: 3000
     ports:
-      - "3000:3000"
+      - "127.0.0.1:3000:3000"
     depends_on:
       postgres:
         condition: service_healthy
@@ -55,17 +67,26 @@ services:
       context: ./services/api-dotnet
     restart: unless-stopped
     ports:
-      - "8080:8080"
+      - "127.0.0.1:8080:8080"
+    environment:
+      ASPNETCORE_ENVIRONMENT: ${ASPNETCORE_ENVIRONMENT:-Development}
+      Cors__AllowedOrigins: ${CORS_ORIGINS:-http://localhost:5173}
 
   frontend:
-    build: ./apps/frontend
+    build:
+      context: ./apps/frontend
+      dockerfile: Dockerfile
     restart: unless-stopped
     ports:
-      - "5173:80"
+      - "127.0.0.1:5173:80"
     depends_on:
-      - api-python
-      - api-rust
-      - api-dotnet
+      api-python:
+        condition: service_started
+      api-rust:
+        condition: service_started
+      api-dotnet:
+        condition: service_started
 
 volumes:
   postgres_data:
+  redis_data:
