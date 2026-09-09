@@ -1,5 +1,29 @@
 packages:
   - 'apps/*'
+
+# Enforce reproducible, reviewed installations across developer machines and CI.
+engineStrict: true
+ignoreScripts: true
+saveExact: true
+strictPeerDependencies: true
+audit: true
+verifyStoreIntegrity: true
+strictStorePkgContentCheck: true
+frozenLockfile: true
+sharedWorkspaceLockfile: true
+minimumReleaseAge: 1440
+
+# Prefer verified local artifacts during transient registry outages, then retry HTTPS.
+strictSsl: true
+preferOffline: true
+fetchRetries: 4
+fetchRetryFactor: 2
+fetchRetryMintimeout: 10000
+fetchRetryMaxtimeout: 60000
+
+# Reject dependencies that transitively resolve from unreviewed Git or URL sources.
+blockExoticSubdeps: true
+
 allowBuilds:
   esbuild: false
 
