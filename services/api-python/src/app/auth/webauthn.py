@@ -25,7 +25,7 @@ from webauthn.helpers.structs import (
 )
 
 RP_ID = os.getenv("WEBAUTHN_RP_ID", "localhost")
-RP_NAME = "BASEAppProtectIA"
+RP_NAME = "Aegis"
 ORIGIN = os.getenv("WEBAUTHN_ORIGIN", "http://localhost:5173")
 
 

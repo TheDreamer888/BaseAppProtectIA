@@ -81,14 +81,14 @@ class Settings(BaseSettings):
 
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
-    app_name: str = "ProtectIA"
+    app_name: str = "Aegis"
     debug: bool = False
 
     # Origens autorizadas para CORS (frontend em dev/produção), separadas por vírgula.
     cors_origins: str = "http://localhost:5173"
 
-    # Gerado automaticamente em dev se não for definido; define SECRET_KEY em produção.
-    secret_key: str = "dev-insecure-secret-key-change-me"
+    # A chave deve ser fornecida em produção; não existe fallback previsível.
+    secret_key: str = ""
 
     # Cloudflare DNS API
     cloudflare_api_token: str | None = None
@@ -100,7 +100,8 @@ class Settings(BaseSettings):
         return [origin.strip() for origin in self.cors_origins.split(",") if origin.strip()]
 
     def require_secret_key(self) -> str:
-        if self.secret_key == "dev-insecure-secret-key-change-me" and not self.debug:
+        environment = os.getenv("ENV", "development").lower()
+        if environment == "production" and not self.secret_key:
             raise RuntimeError("SECRET_KEY não definido em produção — abortando.")
         return self.secret_key
 

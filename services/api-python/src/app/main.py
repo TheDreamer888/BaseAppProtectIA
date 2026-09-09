@@ -8,6 +8,7 @@ from src.ml.model import RiskModel
 from src.pylibrary.logging import get_logger
 
 logger = get_logger(__name__)
+settings.require_secret_key()
 app = FastAPI(title=settings.app_name, version="1.0.0")
 
 app.add_middleware(
