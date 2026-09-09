@@ -1,0 +1,323 @@
+name: Cloudflare DNS Sync
+
+run-name: "Cloudflare DNS • ${{ github.event_name }} • ${{ github.ref_name }}"
+
+on:
+  workflow_dispatch:
+    inputs:
+      record_content:
+        description: "IP ou hostname do registo DNS. Se vazio, usa DNS_RECORD_CONTENT."
+        required: false
+        type: string
+
+      dry_run:
+        description: "Simular sem alterar o DNS"
+        required: false
+        default: false
+        type: boolean
+
+  push:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/cloudflare-dns.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cloudflare-dns-sync
+  cancel-in-progress: true
+
+jobs:
+  sync-dns:
+    name: Sync DNS
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    env:
+      CF_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CF_ZONE_ID: ${{ secrets.CLOUDFLARE_ZONE_ID }}
+
+      RECORD_NAME: ${{ vars.DNS_RECORD_NAME }}
+      RECORD_TYPE: ${{ vars.DNS_RECORD_TYPE || 'A' }}
+      RECORD_CONTENT: ${{ github.event.inputs.record_content || vars.DNS_RECORD_CONTENT }}
+
+      # Cloudflare:
+      # 1 = Auto TTL
+      # 60-86400 = TTL específico
+      DNS_TTL: ${{ vars.DNS_TTL || '1' }}
+
+      # false = DNS only
+      # true  = proxied
+      DNS_PROXIED: ${{ vars.DNS_PROXIED || 'false' }}
+
+      DRY_RUN: ${{ github.event.inputs.dry_run || 'false' }}
+
+    steps:
+      - name: Validate configuration
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+
+          echo "Validando configuração..."
+
+          missing=0
+
+          if [[ -z "${CF_API_TOKEN:-}" ]]; then
+            echo "::error::Secret CLOUDFLARE_API_TOKEN não configurado."
+            missing=1
+          fi
+
+          if [[ -z "${CF_ZONE_ID:-}" ]]; then
+            echo "::error::Secret CLOUDFLARE_ZONE_ID não configurado."
+            missing=1
+          fi
+
+          if [[ -z "${RECORD_NAME:-}" ]]; then
+            echo "::error::Variable DNS_RECORD_NAME não configurada."
+            missing=1
+          fi
+
+          if [[ -z "${RECORD_CONTENT:-}" ]]; then
+            echo "::error::DNS_RECORD_CONTENT não configurado e nenhum input foi fornecido."
+            missing=1
+          fi
+
+          if [[ "$missing" -ne 0 ]]; then
+            exit 1
+          fi
+
+          case "$RECORD_TYPE" in
+            A|AAAA|CNAME)
+              ;;
+            *)
+              echo "::error::DNS_RECORD_TYPE inválido: $RECORD_TYPE"
+              echo "Tipos permitidos: A, AAAA, CNAME"
+              exit 1
+              ;;
+          esac
+
+          if [[ ! "$DNS_TTL" =~ ^[0-9]+$ ]]; then
+            echo "::error::DNS_TTL deve ser numérico."
+            exit 1
+          fi
+
+          if [[ "$DNS_TTL" != "1" ]] &&
+             (( DNS_TTL < 60 || DNS_TTL > 86400 )); then
+            echo "::error::DNS_TTL deve ser 1 ou estar entre 60 e 86400."
+            exit 1
+          fi
+
+          case "$DNS_PROXIED" in
+            true|false)
+              ;;
+            *)
+              echo "::error::DNS_PROXIED deve ser true ou false."
+              exit 1
+              ;;
+          esac
+
+          case "$DRY_RUN" in
+            true|false)
+              ;;
+            *)
+              echo "::error::DRY_RUN deve ser true ou false."
+              exit 1
+              ;;
+          esac
+
+          echo "Configuração válida."
+          echo "Tipo: $RECORD_TYPE"
+          echo "Nome: $RECORD_NAME"
+          echo "TTL: $DNS_TTL"
+          echo "Proxied: $DNS_PROXIED"
+          echo "Dry run: $DRY_RUN"
+
+      - name: Install dependencies
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+
+          command -v curl >/dev/null || {
+            echo "::error::curl não encontrado."
+            exit 1
+          }
+
+          command -v jq >/dev/null || {
+            echo "::error::jq não encontrado."
+            exit 1
+          }
+
+      - name: Check DNS record
+        id: lookup
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+
+          API="https://api.cloudflare.com/client/v4"
+
+          response="$(
+            curl --silent --show-error --fail-with-body \
+              --retry 3 \
+              --retry-delay 2 \
+              --retry-all-errors \
+              --request GET \
+              "${API}/zones/${CF_ZONE_ID}/dns_records" \
+              --header "Authorization: Bearer ${CF_API_TOKEN}" \
+              --header "Content-Type: application/json" \
+              --get \
+              --data-urlencode "type=${RECORD_TYPE}" \
+              --data-urlencode "name=${RECORD_NAME}" \
+              --data-urlencode "per_page=100"
+          )"
+
+          if [[ "$(jq -r '.success' <<< "$response")" != "true" ]]; then
+            echo "::error::Cloudflare devolveu success=false."
+            jq -c '.errors' <<< "$response" >&2
+            exit 1
+          fi
+
+          count="$(jq '.result | length' <<< "$response")"
+
+          echo "Registos encontrados: $count"
+
+          if (( count > 1 )); then
+            echo "::error::Foram encontrados múltiplos registos ${RECORD_TYPE} para ${RECORD_NAME}."
+            echo "O workflow foi interrompido para evitar alterar o registo errado."
+            exit 1
+          fi
+
+          if (( count == 1 )); then
+            record_id="$(jq -r '.result[0].id' <<< "$response")"
+            current_content="$(jq -r '.result[0].content' <<< "$response")"
+
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+            echo "record_id=${record_id}" >> "$GITHUB_OUTPUT"
+
+            {
+              echo "current_content<<EOF"
+              echo "$current_content"
+              echo "EOF"
+            } >> "$GITHUB_OUTPUT"
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Prepare DNS payload
+        id: payload
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+
+          payload="$(
+            jq -cn \
+              --arg type "$RECORD_TYPE" \
+              --arg name "$RECORD_NAME" \
+              --arg content "$RECORD_CONTENT" \
+              --argjson ttl "$DNS_TTL" \
+              --argjson proxied "$DNS_PROXIED" \
+              '{
+                type: $type,
+                name: $name,
+                content: $content,
+                ttl: $ttl,
+                proxied: $proxied
+              }'
+          )"
+
+          {
+            echo "payload<<EOF"
+            echo "$payload"
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Show planned change
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+
+          if [[ "${{ steps.lookup.outputs.exists }}" == "true" ]]; then
+            echo "Ação: UPDATE"
+            echo "Registo: ${RECORD_NAME}"
+            echo "Tipo: ${RECORD_TYPE}"
+            echo "Atual: ${{ steps.lookup.outputs.current_content }}"
+            echo "Novo: ${RECORD_CONTENT}"
+          else
+            echo "Ação: CREATE"
+            echo "Registo: ${RECORD_NAME}"
+            echo "Tipo: ${RECORD_TYPE}"
+            echo "Novo: ${RECORD_CONTENT}"
+          fi
+
+          if [[ "$DRY_RUN" == "true" ]]; then
+            echo ""
+            echo "DRY RUN ATIVO — nenhuma alteração será feita."
+          fi
+
+      - name: Apply DNS change
+        if: env.DRY_RUN != 'true'
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+
+          API="https://api.cloudflare.com/client/v4"
+
+          payload='${{ steps.payload.outputs.payload }}'
+
+          if [[ "${{ steps.lookup.outputs.exists }}" == "true" ]]; then
+            record_id="${{ steps.lookup.outputs.record_id }}"
+
+            echo "Atualizando registo existente..."
+
+            response="$(
+              curl --silent --show-error --fail-with-body \
+                --retry 3 \
+                --retry-delay 2 \
+                --retry-all-errors \
+                --request PATCH \
+                "${API}/zones/${CF_ZONE_ID}/dns_records/${record_id}" \
+                --header "Authorization: Bearer ${CF_API_TOKEN}" \
+                --header "Content-Type: application/json" \
+                --data "$payload"
+            )
+          else
+            echo "Criando novo registo..."
+
+            response="$(
+              curl --silent --show-error --fail-with-body \
+                --retry 3 \
+                --retry-delay 2 \
+                --retry-all-errors \
+                --request POST \
+                "${API}/zones/${CF_ZONE_ID}/dns_records" \
+                --header "Authorization: Bearer ${CF_API_TOKEN}" \
+                --header "Content-Type: application/json" \
+                --data "$payload"
+            )
+          fi
+
+          if [[ "$(jq -r '.success' <<< "$response")" != "true" ]]; then
+            echo "::error::Cloudflare recusou a alteração."
+
+            jq -c '.errors' <<< "$response" >&2
+
+            exit 1
+          fi
+
+          echo "DNS atualizado com sucesso."
+
+      - name: Summary
+        if: always()
+        shell: bash
+        run: |
+          {
+            echo "## Cloudflare DNS Sync"
+            echo ""
+            echo "- **Record:** \`${RECORD_NAME}\`"
+            echo "- **Type:** \`${RECORD_TYPE}\`"
+            echo "- **Action:** ${{ steps.lookup.outputs.exists == 'true' && 'UPDATE' || 'CREATE' }}"
+            echo "- **Dry run:** \`${DRY_RUN}\`"
+            echo ""
+            echo "Workflow concluído."
+          } >> "$GITHUB_STEP_SUMMARY"

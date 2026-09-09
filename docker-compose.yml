@@ -1,0 +1,71 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: protectia
+      POSTGRES_PASSWORD: protectia
+      POSTGRES_DB: protectia
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U protectia"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  api-python:
+    build: ./services/api-python
+    restart: unless-stopped
+    env_file:
+      - ./services/api-python/.env
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  api-rust:
+    build: ./services/api-rust
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgres://protectia:protectia@postgres:5432/protectia
+      PORT: 3000
+    ports:
+      - "3000:3000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  api-dotnet:
+    build:
+      context: ./services/api-dotnet
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+
+  frontend:
+    build: ./apps/frontend
+    restart: unless-stopped
+    ports:
+      - "5173:80"
+    depends_on:
+      - api-python
+      - api-rust
+      - api-dotnet
+
+volumes:
+  postgres_data:

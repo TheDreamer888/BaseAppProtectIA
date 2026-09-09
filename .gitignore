@@ -113,4 +113,10 @@ Thumbs.db
 ehthumbs.db
 Icon?
 node_modules/
-backend/target/
+services/api-rust/target/
+.artifacts/
+*.tgz
+
+
+
+

@@ -1,8 +1,5 @@
 packages:
-  - 'frontend'
-  - 'admin'
-  - 'backend'
-  - 'agent'
-  - 'packages/*'
+  - 'apps/*'
 allowBuilds:
   esbuild: false
+
