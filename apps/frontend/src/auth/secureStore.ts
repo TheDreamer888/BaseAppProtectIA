@@ -66,7 +66,8 @@ async function getOrCreateDeviceKey(): Promise<CryptoKey> {
 
 export async function secureSet(key: string, value: unknown): Promise<void> {
   const cryptoKey = await getOrCreateDeviceKey();
-  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const iv = new Uint8Array(new ArrayBuffer(12));
+  crypto.getRandomValues(iv);
   const plaintext = new TextEncoder().encode(JSON.stringify(value));
   const ciphertext = await crypto.subtle.encrypt({ name: "AES-GCM", iv }, cryptoKey, plaintext);
   const db = await openDb();
@@ -76,7 +77,10 @@ export async function secureSet(key: string, value: unknown): Promise<void> {
 export async function secureGet<T>(key: string): Promise<T | undefined> {
   const cryptoKey = await getOrCreateDeviceKey();
   const db = await openDb();
-  const record = await idbGet<{ iv: Uint8Array; ciphertext: ArrayBuffer }>(db, `data:${key}`);
+  const record = await idbGet<{ iv: Uint8Array<ArrayBuffer>; ciphertext: ArrayBuffer }>(
+    db,
+    `data:${key}`,
+  );
   if (!record) return undefined;
   try {
     const plaintext = await crypto.subtle.decrypt(
