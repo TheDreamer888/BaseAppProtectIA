@@ -1,0 +1,59 @@
+name: npm and pnpm security
+
+on:
+  pull_request:
+    paths:
+      - "package.json"
+      - "pnpm-lock.yaml"
+      - "pnpm-workspace.yaml"
+      - ".npmrc"
+      - "apps/*/package.json"
+      - ".github/workflows/npm-pnpm-security.yml"
+  push:
+    branches:
+      - main
+    paths:
+      - "package.json"
+      - "pnpm-lock.yaml"
+      - "pnpm-workspace.yaml"
+      - ".npmrc"
+      - "apps/*/package.json"
+      - ".github/workflows/npm-pnpm-security.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: npm-pnpm-security-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  dependency-security:
+    name: Dependency security
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.15.1
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - name: Install dependencies from the lockfile
+        run: pnpm install --frozen-lockfile --ignore-scripts
+
+      - name: Audit dependencies
+        run: pnpm audit --audit-level high
+
+      - name: Build frontend
+        run: pnpm --filter frontend build

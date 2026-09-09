@@ -1,0 +1,74 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  frontend:
+    name: Frontend
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.15.1
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile --ignore-scripts
+      - run: pnpm --filter frontend lint
+      - run: pnpm --filter frontend build
+
+  python:
+    name: Python API
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: services/api-python
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: snok/install-poetry@v1
+        with:
+          version: 2.2.1
+          virtualenvs-create: true
+      - run: poetry install --no-interaction
+      - run: poetry run python -m compileall -q src
+
+  rust:
+    name: Rust API
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: services/api-rust
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - run: cargo check --locked
+      - run: cargo test --locked
+
+  dotnet:
+    name: .NET API
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: services/api-dotnet/WebApplication1
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+      - run: dotnet restore
+      - run: dotnet build --no-restore --configuration Release

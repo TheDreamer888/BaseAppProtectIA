@@ -1,0 +1,16 @@
+{
+  "name": "aegis-platform",
+  "private": true,
+  "packageManager": "pnpm@10.15.1",
+  "scripts": {
+    "audit:security": "pnpm audit --audit-level high",
+    "install:ci": "pnpm install --frozen-lockfile --ignore-scripts",
+    "build:frontend": "pnpm --filter frontend build",
+    "dev:frontend": "pnpm --filter frontend dev",
+    "lint:frontend": "pnpm --filter frontend lint",
+    "build": "pnpm run build:frontend",
+    "check:python": "python -m compileall -q services/api-python/src",
+    "check:rust": "cargo check --manifest-path services/api-rust/Cargo.toml",
+    "check:dotnet": "dotnet build services/api-dotnet/WebApplication1/WebApplication1.csproj --no-restore"
+  }
+}

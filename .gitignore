@@ -114,6 +114,8 @@ ehthumbs.db
 Icon?
 node_modules/
 services/api-rust/target/
+**/obj/
+**/target/
 .artifacts/
 *.tgz
 
