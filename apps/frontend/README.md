@@ -1,32 +1,38 @@
-# React + TypeScript + Vite
+# BaseGuard Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+Aplicação React + Vite + TypeScript responsável pela experiência de proteção,
+educação e autenticação do utilizador.
 
-Currently, two official plugins are available:
+## Funcionalidades principais
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- Painel de proteção com estado de monitorização e quarentena
+- Área de educação com percursos e treino financeiro
+- Fluxo de login com provedores OAuth, passkeys e recuperação
 
-## React Compiler
+## Requisitos
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- Node.js 24+
+- pnpm 10+
 
-## Expanding the Oxlint configuration
+## Execução local
 
-If you are developing a production application, we recommend enabling type-aware lint rules by installing `oxlint-tsgolint` and editing `.oxlintrc.json`:
-
-```json
-{
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "oxc"],
-  "options": {
-    "typeAware": true
-  },
-  "rules": {
-    "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
-  }
-}
+```bash
+cd apps/frontend
+pnpm install
+pnpm dev
 ```
 
-See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
+A aplicação fica disponível em `http://localhost:5173`.
+
+## Qualidade
+
+```bash
+pnpm lint
+pnpm build
+```
+
+## Estrutura relevante
+
+- `src/App.tsx`: shell principal e navegação entre áreas
+- `src/components/LoginTab.tsx`: autenticação e recuperação de conta
+- `src/auth/*`: cliente de autenticação e armazenamento seguro

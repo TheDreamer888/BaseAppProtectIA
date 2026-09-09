@@ -1,20 +1,22 @@
 # Aegis
 
-Monorepo organizado em três áreas: `apps/`, `services/` e `infra/`.
+Monorepo com foco em proteção digital, autenticação forte e educação assistida por IA.
+A estrutura está organizada por domínio: aplicações de interface (`apps/`),
+serviços backend (`services/`) e automação/infraestrutura (`infra/`).
 
 ## Estrutura
 
 ```
 apps/
-  frontend/          React + Vite + TypeScript (UI, autenticação/WebAuthn)
+  frontend/            React + Vite + TypeScript
 services/
-  api-python        FastAPI (API principal, DNS via Cloudflare, scoring de risco)
-  api-rust          Axum (API de alta performance, Postgres/Redis)
-  api-dotnet        ASP.NET (serviço .NET 10)
+  api-python/          FastAPI (autenticação, DNS e scoring de risco)
+  api-rust/            Axum (API de alto desempenho)
+  api-dotnet/          ASP.NET (.NET 10)
 infra/
-  scripts/            Scripts de manutenção e verificação
-  arquitetura.sh      Diagrama textual da arquitetura em camadas
-.github/workflows/    CI/CD (inclui sincronização de DNS com a Cloudflare)
+  scripts/             Scripts de verificação e manutenção
+  arquitetura.sh       Diagrama textual da arquitetura
+.github/workflows/     Pipelines CI/CD
 ```
 
 ## Pré-requisitos
@@ -23,11 +25,11 @@ infra/
 - Python 3.12 e Poetry
 - Rust e Cargo
 - .NET SDK 10
-- Docker Desktop, para executar a stack completa
+- Docker Desktop (opcional para stack completa)
 
-## Comandos pela raiz
+## Setup rápido
 
-```powershell
+```bash
 pnpm install
 pnpm run build
 pnpm run lint:frontend
@@ -36,48 +38,54 @@ pnpm run check:rust
 pnpm run check:dotnet
 ```
 
-Os comandos `check:*` dependem do SDK correspondente instalado no ambiente. O
-workspace pnpm gerencia somente `apps/*`; cada serviço mantém o próprio
-manifesto e ciclo de build.
+> O workspace pnpm inclui `apps/*`. Cada serviço em `services/*` mantém o seu
+> próprio ciclo de dependências e build.
 
-## Como executar cada serviço
+## Execução por componente
 
 ### Frontend (`apps/frontend`)
-```powershell
+
+```bash
 pnpm --filter frontend dev
 ```
 
 ### API Python (`services/api-python`)
-```powershell
+
+```bash
 cd services/api-python
 poetry install
 poetry run uvicorn src.app.main:app --reload
 ```
 
 ### API Rust (`services/api-rust`)
-```powershell
+
+```bash
 cd services/api-rust
 cargo run
 ```
 
 ### API .NET (`services/api-dotnet`)
-```powershell
+
+```bash
 cd services/api-dotnet/WebApplication1
 dotnet run
 ```
 
 ## Stack completa com Docker
 
-```powershell
+```bash
 docker compose up --build
 ```
 
-Serviços publicados localmente: frontend em `http://localhost:5173`, API
-Python em `http://localhost:8000`, API Rust em `http://localhost:3000` e API
-.NET em `http://localhost:8080`.
+Serviços locais:
 
-## Variáveis de ambiente
+- Frontend: `http://localhost:5173`
+- API Python: `http://localhost:8000`
+- API Rust: `http://localhost:3000`
+- API .NET: `http://localhost:8080`
 
-Copie `.env.example` e `.env.auth.example` para os serviços que precisar. Nunca
-faça commit de ficheiros `.env` reais.
+## Boas práticas de segurança
 
+- Copiar `.env.example` / `.env.auth.example` antes de executar serviços
+- Nunca versionar ficheiros `.env` reais
+- Executar verificações (`lint`, `check:*`, scans de dependências) antes de merge
