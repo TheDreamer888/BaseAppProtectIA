@@ -324,12 +324,13 @@ function App() {
     )
   }
 
-  const scanLabel =
-    scanState === 'scanning'
-      ? 'Verificando scripts...'
-      : scanState === 'complete'
-        ? 'Varredura concluida'
-        : 'Pronto para verificar'
+  let scanLabel = 'Pronto para verificar'
+
+  if (scanState === 'scanning') {
+    scanLabel = 'Verificando scripts...'
+  } else if (scanState === 'complete') {
+    scanLabel = 'Varredura concluida'
+  }
 
   return (
     <main className="security-app">

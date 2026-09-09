@@ -139,15 +139,15 @@ jobs:
         run: |
           set -Eeuo pipefail
 
-          command -v curl >/dev/null || {
-            echo "::error::curl não encontrado."
-            exit 1
-          }
-
-          command -v jq >/dev/null || {
+          if ! command -v jq >/dev/null 2>&1; then
             echo "::error::jq não encontrado."
             exit 1
-          }
+          fi
+
+          if ! command -v curl >/dev/null 2>&1 && ! command -v wget >/dev/null 2>&1; then
+            echo "::error::curl ou wget não encontrados."
+            exit 1
+          fi
 
       - name: Check DNS record
         id: lookup
@@ -156,21 +156,37 @@ jobs:
           set -Eeuo pipefail
 
           API="https://api.cloudflare.com/client/v4"
+          AUTH_HEADER_NAME="Authorization"
+          AUTH_SCHEME="Bearer"
+          AUTH_HEADER_VALUE="${AUTH_SCHEME} ${CF_API_TOKEN}"
 
-          response="$(
-            curl --silent --show-error --fail-with-body \
-              --retry 3 \
-              --retry-delay 2 \
-              --retry-all-errors \
-              --request GET \
-              "${API}/zones/${CF_ZONE_ID}/dns_records" \
-              --header "Authorization: Bearer ${CF_API_TOKEN}" \
-              --header "Content-Type: application/json" \
-              --get \
-              --data-urlencode "type=${RECORD_TYPE}" \
-              --data-urlencode "name=${RECORD_NAME}" \
-              --data-urlencode "per_page=100"
-          )"
+          if command -v curl >/dev/null 2>&1; then
+            response="$(
+              curl --silent --show-error --fail-with-body \
+                --retry 3 \
+                --retry-delay 2 \
+                --retry-all-errors \
+                --request GET \
+                "${API}/zones/${CF_ZONE_ID}/dns_records" \
+                --header "${AUTH_HEADER_NAME}: ${AUTH_HEADER_VALUE}" \
+                --header "Content-Type: application/json" \
+                --get \
+                --data-urlencode "type=${RECORD_TYPE}" \
+                --data-urlencode "name=${RECORD_NAME}" \
+                --data-urlencode "per_page=100"
+            )"
+          else
+            query="type=${RECORD_TYPE}&name=${RECORD_NAME}&per_page=100"
+            url="${API}/zones/${CF_ZONE_ID}/dns_records?${query}"
+            response="$(
+              wget -qO- \
+                --tries=4 \
+                --waitretry=2 \
+                --header "${AUTH_HEADER_NAME}: ${AUTH_HEADER_VALUE}" \
+                --header "Content-Type: application/json" \
+                "$url"
+            )"
+          fi
 
           if [[ "$(jq -r '.success' <<< "$response")" != "true" ]]; then
             echo "::error::Cloudflare devolveu success=false."
@@ -262,6 +278,9 @@ jobs:
           set -Eeuo pipefail
 
           API="https://api.cloudflare.com/client/v4"
+          AUTH_HEADER_NAME="Authorization"
+          AUTH_SCHEME="Bearer"
+          AUTH_HEADER_VALUE="${AUTH_SCHEME} ${CF_API_TOKEN}"
 
           payload='${{ steps.payload.outputs.payload }}'
 
@@ -270,31 +289,57 @@ jobs:
 
             echo "Atualizando registo existente..."
 
-            response="$(
-              curl --silent --show-error --fail-with-body \
-                --retry 3 \
-                --retry-delay 2 \
-                --retry-all-errors \
-                --request PATCH \
-                "${API}/zones/${CF_ZONE_ID}/dns_records/${record_id}" \
-                --header "Authorization: Bearer ${CF_API_TOKEN}" \
-                --header "Content-Type: application/json" \
-                --data "$payload"
-            )
+            if command -v curl >/dev/null 2>&1; then
+              response="$(
+                curl --silent --show-error --fail-with-body \
+                  --retry 3 \
+                  --retry-delay 2 \
+                  --retry-all-errors \
+                  --request PATCH \
+                  "${API}/zones/${CF_ZONE_ID}/dns_records/${record_id}" \
+                  --header "${AUTH_HEADER_NAME}: ${AUTH_HEADER_VALUE}" \
+                  --header "Content-Type: application/json" \
+                  --data "$payload"
+              )"
+            else
+              response="$(
+                wget -qO- \
+                  --method=PATCH \
+                  --tries=4 \
+                  --waitretry=2 \
+                  --header "${AUTH_HEADER_NAME}: ${AUTH_HEADER_VALUE}" \
+                  --header "Content-Type: application/json" \
+                  --body-data "$payload" \
+                  "${API}/zones/${CF_ZONE_ID}/dns_records/${record_id}"
+              )"
+            fi
           else
             echo "Criando novo registo..."
 
-            response="$(
-              curl --silent --show-error --fail-with-body \
-                --retry 3 \
-                --retry-delay 2 \
-                --retry-all-errors \
-                --request POST \
-                "${API}/zones/${CF_ZONE_ID}/dns_records" \
-                --header "Authorization: Bearer ${CF_API_TOKEN}" \
-                --header "Content-Type: application/json" \
-                --data "$payload"
-            )
+            if command -v curl >/dev/null 2>&1; then
+              response="$(
+                curl --silent --show-error --fail-with-body \
+                  --retry 3 \
+                  --retry-delay 2 \
+                  --retry-all-errors \
+                  --request POST \
+                  "${API}/zones/${CF_ZONE_ID}/dns_records" \
+                  --header "${AUTH_HEADER_NAME}: ${AUTH_HEADER_VALUE}" \
+                  --header "Content-Type: application/json" \
+                  --data "$payload"
+              )"
+            else
+              response="$(
+                wget -qO- \
+                  --method=POST \
+                  --tries=4 \
+                  --waitretry=2 \
+                  --header "${AUTH_HEADER_NAME}: ${AUTH_HEADER_VALUE}" \
+                  --header "Content-Type: application/json" \
+                  --body-data "$payload" \
+                  "${API}/zones/${CF_ZONE_ID}/dns_records"
+              )"
+            fi
           fi
 
           if [[ "$(jq -r '.success' <<< "$response")" != "true" ]]; then
@@ -316,7 +361,11 @@ jobs:
             echo ""
             echo "- **Record:** \`${RECORD_NAME}\`"
             echo "- **Type:** \`${RECORD_TYPE}\`"
-            echo "- **Action:** ${{ steps.lookup.outputs.exists == 'true' && 'UPDATE' || 'CREATE' }}"
+            if [[ "${{ steps.lookup.outputs.exists }}" == "true" ]]; then
+              echo "- **Action:** UPDATE"
+            else
+              echo "- **Action:** CREATE"
+            fi
             echo "- **Dry run:** \`${DRY_RUN}\`"
             echo ""
             echo "Workflow concluído."
