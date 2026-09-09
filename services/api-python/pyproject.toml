@@ -46,6 +46,13 @@ dependencies = [
     "webauthn (>=2.5.0,<3.0.0)"
 ]
 
+[tool.poetry]
+packages = [
+    { include = "app", from = "src" },
+    { include = "ml", from = "src" },
+    { include = "pylibrary", from = "src" },
+]
+
 [tool.poetry.group.dev.dependencies]
 pytest = "^9.1.1"
 pytest-asyncio = "^0.23.0"
