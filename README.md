@@ -86,6 +86,6 @@ Serviços locais:
 
 ## Boas práticas de segurança
 
-- Copiar `.env.example` / `.env.auth.example` antes de executar serviços
+- Configurar as variáveis de ambiente exigidas por cada serviço antes da execução
 - Nunca versionar ficheiros `.env` reais
 - Executar verificações (`lint`, `check:*`, scans de dependências) antes de merge
