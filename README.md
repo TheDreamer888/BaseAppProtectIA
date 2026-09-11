@@ -1,4 +1,4 @@
-# Aegis
+# AuryonSafe
 
 Monorepo organizado em três áreas: `apps/`, `services/` e `infra/`.
 
@@ -8,6 +8,7 @@ Monorepo organizado em três áreas: `apps/`, `services/` e `infra/`.
 apps/
   frontend/          React + Vite + TypeScript (UI, autenticação/WebAuthn)
 services/
+  api-c             Serviço C de DNS e fetch HTTP seguro
   api-python        FastAPI (API principal, DNS via Cloudflare, scoring de risco)
   api-rust          Axum (API de alta performance, Postgres/Redis)
   api-dotnet        ASP.NET (serviço .NET 10)
@@ -66,6 +67,14 @@ cd services/api-dotnet/WebApplication1
 dotnet run
 ```
 
+### API C (`services/api-c`)
+```powershell
+cd services/api-c
+make
+$env:PORT = "8090"
+./bin/api-c
+```
+
 ## Stack completa com Docker
 
 ```powershell
@@ -73,11 +82,13 @@ docker compose up --build
 ```
 
 Serviços publicados localmente: frontend em `http://localhost:5173`, API
-Python em `http://localhost:8000`, API Rust em `http://localhost:3000` e API
-.NET em `http://localhost:8080`.
+Python em `http://localhost:8000`, API Rust em `http://localhost:3000`, API
+.NET em `http://localhost:8080` e API C em `http://localhost:8090`.
 
 ## Variáveis de ambiente
 
-Copie `.env.example` e `.env.auth.example` para os serviços que precisar. Nunca
-faça commit de ficheiros `.env` reais.
+Copie `.env.example` para `.env` na raiz antes de usar o Docker Compose. A API
+Python também precisa de `services/api-python/.env` com os segredos descritos no
+README do serviço. `.env.auth.example` contém apenas opções de OAuth; nunca faça
+commit de ficheiros `.env` reais.
 

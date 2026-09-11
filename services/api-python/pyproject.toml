@@ -1,7 +1,7 @@
 [project]
 name = "aegis-api"
 version = "0.1.0"
-description = "Aegis security and authentication API."
+description = "AuryonSafe security and authentication API."
 authors = [
     {name = "DavidTheEngenieer"}
 ]

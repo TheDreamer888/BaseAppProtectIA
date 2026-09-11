@@ -9,9 +9,11 @@ from __future__ import annotations
 from typing import Any, Literal
 
 import httpx
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
 
+from src.app.auth.dependencies import require_user
+from src.app.auth.store import UserRecord
 from src.app.config import settings
 from src.pylibrary.logging import get_logger
 
@@ -24,16 +26,16 @@ CLOUDFLARE_API_BASE = "https://api.cloudflare.com/client/v4"
 
 class DNSRecordIn(BaseModel):
     type: Literal["A", "AAAA", "CNAME", "TXT", "MX", "NS", "SRV"]
-    name: str = Field(..., description="Nome do registo, ex: www.exemplo.com")
-    content: str = Field(..., description="Valor do registo, ex: 1.2.3.4")
+    name: str = Field(..., min_length=1, max_length=253, description="Nome do registo, ex: www.exemplo.com")
+    content: str = Field(..., min_length=1, max_length=4096, description="Valor do registo, ex: 1.2.3.4")
     ttl: int = Field(default=1, ge=1, description="TTL em segundos (1 = automático)")
     proxied: bool = Field(default=False, description="Ativar o proxy/CDN da Cloudflare")
 
 
 class DNSRecordUpdate(BaseModel):
     type: Literal["A", "AAAA", "CNAME", "TXT", "MX", "NS", "SRV"] | None = None
-    name: str | None = None
-    content: str | None = None
+    name: str | None = Field(default=None, min_length=1, max_length=253)
+    content: str | None = Field(default=None, min_length=1, max_length=4096)
     ttl: int | None = Field(default=None, ge=1)
     proxied: bool | None = None
 
@@ -68,7 +70,11 @@ async def _raise_on_cf_error(resp: httpx.Response) -> dict[str, Any]:
 
 
 @router.get("/records")
-async def list_records(name: str | None = None, type: str | None = None) -> dict[str, Any]:
+async def list_records(
+    name: str | None = None,
+    type: Literal["A", "AAAA", "CNAME", "TXT", "MX", "NS", "SRV"] | None = None,
+    _: UserRecord = Depends(require_user),
+) -> dict[str, Any]:
     """Lista os registos DNS da zona configurada, com filtros opcionais."""
     token, zone_id = _require_config()
     params = {k: v for k, v in {"name": name, "type": type}.items() if v}
@@ -79,7 +85,7 @@ async def list_records(name: str | None = None, type: str | None = None) -> dict
 
 
 @router.post("/records", status_code=201)
-async def create_record(record: DNSRecordIn) -> dict[str, Any]:
+async def create_record(record: DNSRecordIn, _: UserRecord = Depends(require_user)) -> dict[str, Any]:
     """Cria um novo registo DNS na zona configurada."""
     token, zone_id = _require_config()
     async with _client(token) as client:
@@ -90,7 +96,7 @@ async def create_record(record: DNSRecordIn) -> dict[str, Any]:
 
 
 @router.patch("/records/{record_id}")
-async def update_record(record_id: str, record: DNSRecordUpdate) -> dict[str, Any]:
+async def update_record(record_id: str, record: DNSRecordUpdate, _: UserRecord = Depends(require_user)) -> dict[str, Any]:
     """Atualiza parcialmente um registo DNS existente."""
     token, zone_id = _require_config()
     payload = record.model_dump(exclude_none=True)
@@ -104,7 +110,7 @@ async def update_record(record_id: str, record: DNSRecordUpdate) -> dict[str, An
 
 
 @router.delete("/records/{record_id}")
-async def delete_record(record_id: str) -> dict[str, Any]:
+async def delete_record(record_id: str, _: UserRecord = Depends(require_user)) -> dict[str, Any]:
     """Remove um registo DNS."""
     token, zone_id = _require_config()
     async with _client(token) as client:

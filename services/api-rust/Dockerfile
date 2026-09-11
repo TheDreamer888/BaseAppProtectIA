@@ -1,18 +1,19 @@
 # --- build stage ---
-FROM rust:1.90-slim AS build
+FROM fedora:41 AS build
+RUN dnf install -y --setopt=install_weak_deps=False cargo rust openssl-devel pkgconf-pkg-config gcc && dnf clean all
 WORKDIR /app
-RUN apt-get update && apt-get install -y --no-install-recommends pkg-config libssl-dev && rm -rf /var/lib/apt/lists/*
 COPY Cargo.toml Cargo.lock ./
 COPY src ./src
 RUN cargo build --release
 
 # --- runtime stage ---
-FROM debian:bookworm-20250908-slim
-RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates libssl3 && rm -rf /var/lib/apt/lists/*
+FROM fedora:41
+RUN dnf install -y --setopt=install_weak_deps=False ca-certificates openssl-libs wget \
+    && dnf clean all \
+    && useradd --create-home --shell /sbin/nologin appuser
 WORKDIR /app
 COPY --from=build /app/target/release/api-rust ./api-rust
 
-RUN useradd --create-home --shell /bin/false appuser
 USER appuser
 
 EXPOSE 3000

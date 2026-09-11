@@ -32,6 +32,11 @@ class BackupCodesResponse(BaseModel):
     codes: list[str]
 
 
+class BackupCodeRedeemRequest(BaseModel):
+    email: EmailStr
+    code: str
+
+
 class ConsentRequest(BaseModel):
     terms_accepted: bool
     privacy_accepted: bool

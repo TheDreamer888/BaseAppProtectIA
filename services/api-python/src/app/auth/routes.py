@@ -20,9 +20,11 @@ import httpx
 from fastapi import APIRouter, HTTPException, Request, Response
 
 from src.app.auth.providers import PROVIDERS, enabled_providers
+from src.app.auth.dependencies import current_user
 from src.app.auth.recovery import generate_backup_codes, verify_backup_code
 from src.app.auth.schemas import (
     BackupCodesResponse,
+    BackupCodeRedeemRequest,
     ConsentRequest,
     OAuthStartResponse,
     SessionUser,
@@ -93,14 +95,19 @@ def oauth_start(provider: str, response: Response) -> OAuthStartResponse:
 
 @router.get("/oauth/{provider}/callback")
 async def oauth_callback(provider: str, request: Request, response: Response, code: str, state: str):
+    p = PROVIDERS.get(provider)
+    if not p or not (p.client_id and p.client_secret):
+        raise HTTPException(404, "Provedor indisponível")
     flow = request.cookies.get(_OAUTH_FLOW_COOKIE)
     if not flow:
         raise HTTPException(400, "Fluxo de login expirado, tenta novamente.")
-    saved_provider, saved_state, verifier = flow.split(":", 2)
+    try:
+        saved_provider, saved_state, verifier = flow.split(":", 2)
+    except ValueError as exc:
+        raise HTTPException(400, "Fluxo de login inválido.") from exc
     if saved_provider != provider or saved_state != state:
         raise HTTPException(400, "State inválido — possível CSRF.")
 
-    p = PROVIDERS[provider]
     redirect_uri = f"{os.getenv('PUBLIC_API_URL', 'http://localhost:8000')}/api/auth/oauth/{provider}/callback"
 
     async with httpx.AsyncClient(timeout=10) as client:
@@ -140,14 +147,7 @@ async def oauth_callback(provider: str, request: Request, response: Response, co
     return response
 
 
-def _current_user(request: Request) -> UserRecord | None:
-    token = request.cookies.get(SESSION_COOKIE_NAME)
-    if not token:
-        return None
-    claims = verify_session_token(token)
-    if not claims:
-        return None
-    return store.users.get(claims["sub"])
+_current_user = current_user
 
 
 @router.get("/session", response_model=SessionUser | None)
@@ -251,12 +251,13 @@ def generate_codes(request: Request) -> BackupCodesResponse:
 
 
 @router.post("/recovery/backup-codes/redeem")
-def redeem_code(email: str, code: str, response: Response) -> dict:
-    user_id = store.email_index.get(email)
+def redeem_code(body: BackupCodeRedeemRequest, response: Response) -> dict:
+    normalized_email = str(body.email).casefold()
+    user_id = store.email_index.get(normalized_email)
     user = store.users.get(user_id) if user_id else None
     if not user:
         raise HTTPException(404, "Conta não encontrada.")
-    idx = verify_backup_code(code, user.backup_code_hashes)
+    idx = verify_backup_code(body.code, user.backup_code_hashes)
     if idx is None:
         raise HTTPException(400, "Código inválido ou já utilizado.")
     user.backup_code_hashes.pop(idx)  # one-time use

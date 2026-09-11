@@ -90,6 +90,15 @@ PROVIDERS: dict[str, OAuthProvider] = {
             email_field="email",
             name_field="name",
         ),
+        _provider(
+            "amazon",
+            "Amazon/AWS",
+            "https://www.amazon.com/ap/oa",
+            "https://api.amazon.com/auth/o2/token",
+            "https://api.amazon.com/user/profile",
+            "profile",
+            id_field="user_id",
+        ),
         # Extra alternatives ("todas as alternativas") — enabled automatically
         # once the matching *_CLIENT_ID / *_CLIENT_SECRET env vars are set.
         _provider(

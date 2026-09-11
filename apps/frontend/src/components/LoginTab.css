@@ -1,29 +1,62 @@
 .login-tab {
-  max-width: 420px;
-  margin: 0 auto;
-  padding: 1.5rem;
+  width: min(100%, 460px);
+  margin: 32px auto;
+  padding: 32px;
+  border: 1px solid #2f3336;
   border-radius: 12px;
-  background: var(--accent-bg, #1a1a1a);
-  color: inherit;
+  background: #000;
+  box-shadow: 0 20px 55px rgba(255, 255, 255, 0.04);
+  color: #f7f9f9;
   text-align: left;
+}
+
+.login-tab h2 {
+  margin: 0 0 8px;
+  color: #f7f9f9;
+  font: 700 30px/1.1 Georgia, serif;
+}
+
+.login-tab > p {
+  margin: 0 0 22px;
+  color: #f7f9f9;
+  font: 800 32px/1.05 'Trebuchet MS', sans-serif;
+  letter-spacing: 0;
+  line-height: 1.5;
 }
 
 .login-tab__tabs {
   display: flex;
-  gap: 0.5rem;
+  border-left: 3px solid #00f28b;
   margin-bottom: 1rem;
 }
 
 .login-tab__tabs button {
   flex: 1;
-  padding: 0.4rem;
-  border-radius: 6px;
-  border: 1px solid transparent;
+  min-height: 42px;
+.login-tab__provider-btn:hover { border-color: #00f28b; background: #101a15; }
+  padding: 0.55rem 0.7rem;
+  border: 1px solid #536471;
+  border-radius: 999px;
+.login-tab__legal input { margin-top: 3px; accent-color: #00f28b; }
+.login-tab__legal a { color: #00f28b; font-weight: 700; }
+.login-tab__legal a:hover { color: #8affc4; }
+  background: transparent;
+  color: #8b98a5;
+  cursor: pointer;
+  font-weight: 700;
 }
 
 .login-tab__tabs button.active {
-  border-color: var(--accent-border, #646cff);
-  font-weight: 600;
+  border-color: #1d9bf0;
+  background: rgba(29, 155, 240, 0.14);
+  color: #1d9bf0;
+}
+
+.login-tab button:focus-visible,
+.login-tab input:focus-visible,
+.login-tab a:focus-visible {
+  outline: 3px solid #1d9bf0;
+  outline-offset: 2px;
 }
 
 .login-tab__providers,
@@ -36,22 +69,93 @@
   margin-bottom: 1rem;
 }
 
+.login-tab__providers > p,
+.login-tab__recovery > p {
+  margin: 4px 0 8px;
+  padding: 12px 14px;
+  border-left: 3px solid #1d9bf0;
+  background: #101214;
+  color: #aab8c2;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
 .login-tab__provider-btn {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  padding: 0.6rem 1rem;
-  border-radius: 8px;
+  min-height: 46px;
+  padding: 0.7rem 1rem;
+  border: 1px solid #536471;
+  border-radius: 999px;
+  background: #000;
+  color: #f7f9f9;
+  cursor: pointer;
+  font-weight: 700;
   text-align: left;
 }
 
+.login-tab__provider-btn:hover { border-color: #1d9bf0; background: #101214; }
+
+.login-tab__passkey input,
+.login-tab__recovery input {
+  min-height: 44px;
+  padding: 0.7rem 0.8rem;
+  border: 1px solid #536471;
+  border-radius: 6px;
+  background: #101214;
+  color: #f7f9f9;
+}
+
+.login-tab__passkey button,
+.login-tab__recovery button,
+.login-tab__actions button {
+  min-height: 44px;
+  padding: 0.7rem 0.9rem;
+  border: 0;
+  border-radius: 6px;
+  background: #1d9bf0;
+  color: #fff;
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.login-tab button:disabled { cursor: not-allowed; opacity: 0.55; }
+
 .login-tab__legal {
-  border: none;
+  margin: 22px 0 0;
+  border-top: 1px solid #2f3336;
+  border-right: 0;
+  border-bottom: 0;
+  border-left: 0;
   display: flex;
   flex-direction: column;
   gap: 0.4rem;
   font-size: 0.85rem;
-  padding: 0;
+  padding: 18px 0 0;
+  color: #8b98a5;
+}
+
+.login-tab__legal label {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  line-height: 1.4;
+}
+
+.login-tab__legal input { margin-top: 3px; accent-color: #1d9bf0; }
+.login-tab__legal a { color: #1d9bf0; font-weight: 700; }
+.login-tab__legal a:hover { color: #8ecdf8; }
+
+.login-tab__status {
+  margin: 16px 0 0;
+  padding: 11px 13px;
+  border-radius: 5px;
+  background: #2b1619;
+  color: #f18b9a;
+  font-size: 0.85rem;
+  line-height: 1.4;
+  word-break: break-word;
 }
 
 .login-tab__hint {
@@ -59,8 +163,9 @@
   opacity: 0.8;
 }
 
-.login-tab__status {
-  margin-top: 0.75rem;
-  font-size: 0.85rem;
-  word-break: break-word;
+@media (max-width: 620px) {
+  .login-shell { padding: 78px 16px 24px; }
+  .back-button { top: 18px; left: 16px; }
+  .login-tab { padding: 24px 20px; }
+  .login-tab h2 { font-size: 27px; }
 }

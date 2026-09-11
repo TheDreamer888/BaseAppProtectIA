@@ -1,4 +1,4 @@
-# Aegis API (Python)
+# AuryonSafe API (Python)
 
 API principal em FastAPI: autenticação, DNS (Cloudflare) e scoring de risco (ver `src/ml`).
 
@@ -37,6 +37,18 @@ Ferramentas de scan já declaradas no grupo `dev` do `pyproject.toml`
 
 Corre estas verificações antes de cada release e sempre que uma dependência
 for adicionada ou atualizada.
+
+## Auditoria de manifestos npm
+
+`POST /api/security/npm/analyze` é um endpoint autenticado que recebe o nome do
+pacote e o conteúdo estruturado de um `package.json`. A resposta inclui a
+pontuação de risco, o número de dependências analisadas e achados explicáveis
+para scripts de ciclo de vida, versões pouco restritivas e origens fora do
+registo npm.
+
+O serviço não instala dependências, não executa scripts e não faz pedidos às
+URLs declaradas no manifesto. O corpo é limitado a 200 campos de topo e os
+nomes dos pacotes a 214 caracteres.
 
 ## Verificação de certificados TLS
 

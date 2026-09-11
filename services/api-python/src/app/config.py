@@ -81,11 +81,14 @@ class Settings(BaseSettings):
 
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
-    app_name: str = "Aegis"
+    app_name: str = "AuryonSafe"
     debug: bool = False
 
     # Origens autorizadas para CORS (frontend em dev/produção), separadas por vírgula.
     cors_origins: str = "http://localhost:5173"
+
+    # Hosts aceites pelo servidor, separados por vírgula; use domínio explícito em produção.
+    allowed_hosts: str = "localhost,127.0.0.1"
 
     # A chave deve ser fornecida em produção; não existe fallback previsível.
     secret_key: str = ""
@@ -98,6 +101,10 @@ class Settings(BaseSettings):
     @property
     def cors_origin_list(self) -> list[str]:
         return [origin.strip() for origin in self.cors_origins.split(",") if origin.strip()]
+
+    @property
+    def allowed_host_list(self) -> list[str]:
+        return [host.strip() for host in self.allowed_hosts.split(",") if host.strip()]
 
     def require_secret_key(self) -> str:
         environment = os.getenv("ENV", "development").lower()

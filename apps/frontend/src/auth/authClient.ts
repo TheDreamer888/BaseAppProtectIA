@@ -1,6 +1,6 @@
 /**
  * authClient — the app's auth "SDK". Everything a UI needs to sign in with
- * Google/Microsoft/GitHub/passkeys/backup-codes lives behind this small API.
+ * Google/Microsoft/GitHub/Amazon/passkeys/backup-codes lives behind this small API.
  *
  * Session tokens are httpOnly cookies (never touched here). This client only
  * caches a non-sensitive profile snapshot, encrypted at rest (see
@@ -44,7 +44,7 @@ export const authClient = {
     return api("/api/auth/providers");
   },
 
-  /** Redirects the browser to the provider's consent screen (Google/Microsoft/GitHub/...). */
+  /** Redirects the browser to the provider's consent screen (Google/Microsoft/GitHub/Amazon/...). */
   async loginWithProvider(providerId: string): Promise<void> {
     const { authorize_url } = await api<{ authorize_url: string; state: string }>(
       `/api/auth/oauth/${providerId}/start`,
@@ -104,10 +104,10 @@ export const authClient = {
   },
 
   async loginWithBackupCode(email: string, code: string): Promise<void> {
-    await api(
-      `/api/auth/recovery/backup-codes/redeem?email=${encodeURIComponent(email)}&code=${encodeURIComponent(code)}`,
-      { method: "POST" },
-    );
+    await api("/api/auth/recovery/backup-codes/redeem", {
+      method: "POST",
+      body: JSON.stringify({ email, code }),
+    });
   },
 
   async recordConsent(termsAccepted: boolean, privacyAccepted: boolean, marketingOptIn = false): Promise<void> {

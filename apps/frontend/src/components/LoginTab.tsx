@@ -6,6 +6,7 @@ const PROVIDER_ICONS: Record<string, string> = {
   google: "🟢",
   microsoft: "🟦",
   github: "🐙",
+  amazon: "a",
   gitlab: "🦊",
   apple: "🍎",
   discord: "🎮",

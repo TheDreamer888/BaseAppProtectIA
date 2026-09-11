@@ -72,6 +72,16 @@ services:
       ASPNETCORE_ENVIRONMENT: ${ASPNETCORE_ENVIRONMENT:-Development}
       Cors__AllowedOrigins: ${CORS_ORIGINS:-http://localhost:5173}
 
+  api-c:
+    build:
+      context: ./services/api-c
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    environment:
+      PORT: 8090
+    ports:
+      - "127.0.0.1:8090:8090"
+
   frontend:
     build:
       context: ./apps/frontend
@@ -85,6 +95,8 @@ services:
       api-rust:
         condition: service_started
       api-dotnet:
+        condition: service_started
+      api-c:
         condition: service_started
 
 volumes:
