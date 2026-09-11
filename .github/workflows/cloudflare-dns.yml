@@ -144,10 +144,17 @@ jobs:
             exit 1
           fi
 
-          if ! command -v curl >/dev/null 2>&1 && ! command -v wget >/dev/null 2>&1; then
-            echo "::error::curl ou wget não encontrados."
+          if command -v curl >/dev/null 2>&1; then
+            http_client="curl"
+          elif command -v wget >/dev/null 2>&1; then
+            http_client="wget"
+          else
+            echo "::error::Nenhum cliente HTTP compatível foi encontrado (curl ou wget)."
             exit 1
           fi
+
+          echo "HTTP_CLIENT=${http_client}" >> "$GITHUB_ENV"
+          echo "Cliente HTTP selecionado: ${http_client}"
 
       - name: Check DNS record
         id: lookup
@@ -160,33 +167,43 @@ jobs:
           AUTH_SCHEME="Bearer"
           AUTH_HEADER_VALUE="${AUTH_SCHEME} ${CF_API_TOKEN}"
 
-          if command -v curl >/dev/null 2>&1; then
-            response="$(
-              curl --silent --show-error --fail-with-body \
-                --retry 3 \
-                --retry-delay 2 \
-                --retry-all-errors \
-                --request GET \
-                "${API}/zones/${CF_ZONE_ID}/dns_records" \
-                --header "${AUTH_HEADER_NAME}: ${AUTH_HEADER_VALUE}" \
-                --header "Content-Type: application/json" \
-                --get \
-                --data-urlencode "type=${RECORD_TYPE}" \
-                --data-urlencode "name=${RECORD_NAME}" \
-                --data-urlencode "per_page=100"
-            )"
-          else
-            query="type=${RECORD_TYPE}&name=${RECORD_NAME}&per_page=100"
-            url="${API}/zones/${CF_ZONE_ID}/dns_records?${query}"
-            response="$(
-              wget -qO- \
-                --tries=4 \
-                --waitretry=2 \
-                --header "${AUTH_HEADER_NAME}: ${AUTH_HEADER_VALUE}" \
-                --header "Content-Type: application/json" \
-                "$url"
-            )"
-          fi
+          case "${HTTP_CLIENT:-}" in
+            curl)
+              response="$(
+                curl --silent --show-error --fail-with-body \
+                  --retry 3 \
+                  --retry-delay 2 \
+                  --retry-all-errors \
+                  --connect-timeout 10 \
+                  --max-time 45 \
+                  --request GET \
+                  "${API}/zones/${CF_ZONE_ID}/dns_records" \
+                  --header "${AUTH_HEADER_NAME}: ${AUTH_HEADER_VALUE}" \
+                  --header "Content-Type: application/json" \
+                  --get \
+                  --data-urlencode "type=${RECORD_TYPE}" \
+                  --data-urlencode "name=${RECORD_NAME}" \
+                  --data-urlencode "per_page=100"
+              )"
+              ;;
+            wget)
+              query="type=${RECORD_TYPE}&name=${RECORD_NAME}&per_page=100"
+              url="${API}/zones/${CF_ZONE_ID}/dns_records?${query}"
+              response="$(
+                wget -qO- \
+                  --tries=4 \
+                  --waitretry=2 \
+                  --timeout=20 \
+                  --header "${AUTH_HEADER_NAME}: ${AUTH_HEADER_VALUE}" \
+                  --header "Content-Type: application/json" \
+                  "$url"
+              )"
+              ;;
+            *)
+              echo "::error::HTTP_CLIENT inválido. Esperado: curl ou wget."
+              exit 1
+              ;;
+          esac
 
           if [[ "$(jq -r '.success' <<< "$response")" != "true" ]]; then
             echo "::error::Cloudflare devolveu success=false."
@@ -289,57 +306,77 @@ jobs:
 
             echo "Atualizando registo existente..."
 
-            if command -v curl >/dev/null 2>&1; then
-              response="$(
-                curl --silent --show-error --fail-with-body \
-                  --retry 3 \
-                  --retry-delay 2 \
-                  --retry-all-errors \
-                  --request PATCH \
-                  "${API}/zones/${CF_ZONE_ID}/dns_records/${record_id}" \
-                  --header "${AUTH_HEADER_NAME}: ${AUTH_HEADER_VALUE}" \
-                  --header "Content-Type: application/json" \
-                  --data "$payload"
-              )"
-            else
-              response="$(
-                wget -qO- \
-                  --method=PATCH \
-                  --tries=4 \
-                  --waitretry=2 \
-                  --header "${AUTH_HEADER_NAME}: ${AUTH_HEADER_VALUE}" \
-                  --header "Content-Type: application/json" \
-                  --body-data "$payload" \
-                  "${API}/zones/${CF_ZONE_ID}/dns_records/${record_id}"
-              )"
-            fi
+            case "${HTTP_CLIENT:-}" in
+              curl)
+                response="$(
+                  curl --silent --show-error --fail-with-body \
+                    --retry 3 \
+                    --retry-delay 2 \
+                    --retry-all-errors \
+                    --connect-timeout 10 \
+                    --max-time 45 \
+                    --request PATCH \
+                    "${API}/zones/${CF_ZONE_ID}/dns_records/${record_id}" \
+                    --header "${AUTH_HEADER_NAME}: ${AUTH_HEADER_VALUE}" \
+                    --header "Content-Type: application/json" \
+                    --data "$payload"
+                )"
+                ;;
+              wget)
+                response="$(
+                  wget -qO- \
+                    --method=PATCH \
+                    --tries=4 \
+                    --waitretry=2 \
+                    --timeout=20 \
+                    --header "${AUTH_HEADER_NAME}: ${AUTH_HEADER_VALUE}" \
+                    --header "Content-Type: application/json" \
+                    --body-data "$payload" \
+                    "${API}/zones/${CF_ZONE_ID}/dns_records/${record_id}"
+                )"
+                ;;
+              *)
+                echo "::error::HTTP_CLIENT inválido. Esperado: curl ou wget."
+                exit 1
+                ;;
+            esac
           else
             echo "Criando novo registo..."
 
-            if command -v curl >/dev/null 2>&1; then
-              response="$(
-                curl --silent --show-error --fail-with-body \
-                  --retry 3 \
-                  --retry-delay 2 \
-                  --retry-all-errors \
-                  --request POST \
-                  "${API}/zones/${CF_ZONE_ID}/dns_records" \
-                  --header "${AUTH_HEADER_NAME}: ${AUTH_HEADER_VALUE}" \
-                  --header "Content-Type: application/json" \
-                  --data "$payload"
-              )"
-            else
-              response="$(
-                wget -qO- \
-                  --method=POST \
-                  --tries=4 \
-                  --waitretry=2 \
-                  --header "${AUTH_HEADER_NAME}: ${AUTH_HEADER_VALUE}" \
-                  --header "Content-Type: application/json" \
-                  --body-data "$payload" \
-                  "${API}/zones/${CF_ZONE_ID}/dns_records"
-              )"
-            fi
+            case "${HTTP_CLIENT:-}" in
+              curl)
+                response="$(
+                  curl --silent --show-error --fail-with-body \
+                    --retry 3 \
+                    --retry-delay 2 \
+                    --retry-all-errors \
+                    --connect-timeout 10 \
+                    --max-time 45 \
+                    --request POST \
+                    "${API}/zones/${CF_ZONE_ID}/dns_records" \
+                    --header "${AUTH_HEADER_NAME}: ${AUTH_HEADER_VALUE}" \
+                    --header "Content-Type: application/json" \
+                    --data "$payload"
+                )"
+                ;;
+              wget)
+                response="$(
+                  wget -qO- \
+                    --method=POST \
+                    --tries=4 \
+                    --waitretry=2 \
+                    --timeout=20 \
+                    --header "${AUTH_HEADER_NAME}: ${AUTH_HEADER_VALUE}" \
+                    --header "Content-Type: application/json" \
+                    --body-data "$payload" \
+                    "${API}/zones/${CF_ZONE_ID}/dns_records"
+                )"
+                ;;
+              *)
+                echo "::error::HTTP_CLIENT inválido. Esperado: curl ou wget."
+                exit 1
+                ;;
+            esac
           fi
 
           if [[ "$(jq -r '.success' <<< "$response")" != "true" ]]; then
