@@ -81,3 +81,7 @@ Python em `http://localhost:8000`, API Rust em `http://localhost:3000` e API
 Copie `.env.example` e `.env.auth.example` para os serviços que precisar. Nunca
 faça commit de ficheiros `.env` reais.
 
+## Contribuição e governança
+
+- Veja `/home/runner/work/BaseAppProtectIA/BaseAppProtectIA/CONTRIBUTING.md` para o fluxo de branches, checks obrigatórios e organização do GitHub.
+- Veja `/home/runner/work/BaseAppProtectIA/BaseAppProtectIA/SECURITY.md` para a política de reporte de vulnerabilidades.
