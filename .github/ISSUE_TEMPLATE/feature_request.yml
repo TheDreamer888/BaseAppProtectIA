@@ -12,7 +12,7 @@ body:
     id: area
     attributes:
       label: Área alvo
-      description: Ex.: frontend, api-python, api-rust, api-dotnet, workflows
+      description: "Ex.: frontend, api-python, api-rust, api-dotnet, workflows"
       placeholder: api-python
     validations:
       required: true

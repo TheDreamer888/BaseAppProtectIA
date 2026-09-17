@@ -47,7 +47,7 @@ jobs:
       # true  = proxied
       DNS_PROXIED: ${{ vars.DNS_PROXIED || 'false' }}
 
-      DRY_RUN: ${{ github.event.inputs.dry_run || 'false' }}
+      DRY_RUN: ${{ github.event.inputs.dry_run || 'true' }}
 
     steps:
       - name: Validate configuration

@@ -83,5 +83,5 @@ faça commit de ficheiros `.env` reais.
 
 ## Contribuição e governança
 
-- Veja `/home/runner/work/BaseAppProtectIA/BaseAppProtectIA/CONTRIBUTING.md` para o fluxo de branches, checks obrigatórios e organização do GitHub.
-- Veja `/home/runner/work/BaseAppProtectIA/BaseAppProtectIA/SECURITY.md` para a política de reporte de vulnerabilidades.
+- Veja `CONTRIBUTING.md` para o fluxo de branches, checks obrigatórios e organização do GitHub.
+- Veja `SECURITY.md` para a política de reporte de vulnerabilidades.
