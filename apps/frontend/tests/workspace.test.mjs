@@ -30,3 +30,9 @@ test('export excludes raw input and unexpected fields', () => {
   assert.equal(output.includes('192.0.2.1'), false)
   assert.deepEqual(JSON.parse(output).events[0], { at: '2026-09-12T00:00:00Z', rules: ['credential'], count: 1 })
 })
+
+test('review rejects long lines before regex matching and accepts bounded multiline text', () => {
+  assert.throws(() => inspectText('curl '.repeat(401)), /2000/)
+  assert.deepEqual(inspectText(('a'.repeat(1999) + '\n').repeat(50)), [])
+  assert.throws(() => simulatePosition(1000, Number.MIN_VALUE, 100, 0))
+})

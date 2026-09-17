@@ -10,8 +10,10 @@ const patterns: { id: string; pattern: RegExp; title: string; detail: string; se
 
 // Static, local heuristics only. Never execute input or retrieve embedded URLs.
 export function inspectText(input: string): Finding[] {
-  if (!input.trim()) throw new Error('Cola primeiro o texto que queres analisar.')
+
   if (input.length > 100_000) throw new Error('O limite é 100 000 caracteres por análise.')
+  if (!input.trim()) throw new Error('Cola primeiro o texto que queres analisar.')
+  if (input.split('\n').some(line => line.length > 2000)) throw new Error('O limite por linha é 2000 caracteres. Divide linhas longas antes da análise.')
   return patterns.filter((rule) => rule.pattern.test(input)).map(({ id, title, detail, severity }) => ({ id, title, detail, severity }))
 }
 
