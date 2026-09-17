@@ -2,11 +2,11 @@
  * authClient — the app's auth "SDK". Everything a UI needs to sign in with
  * Google/Microsoft/GitHub/passkeys/backup-codes lives behind this small API.
  *
- * Session tokens are httpOnly cookies (never touched here). This client only
+ * Session tokens are httpOnly cookies (never touched here). This client previously
  * caches a non-sensitive profile snapshot, encrypted at rest (see
- * secureStore.ts) so it isn't readable even from the page's own devtools.
+ * secureStore.ts) but cached data must never establish an authenticated session.
  */
-import { secureClear, secureGet, secureSet } from "./secureStore";
+import { secureClear } from "./secureStore";
 import { createPasskey, getPasskeyAssertion, isPasskeySupported } from "./webauthn";
 
 const API_BASE = import.meta.env['VITE_API_BASE_URL'] ?? "http://localhost:8000";
@@ -53,14 +53,11 @@ export const authClient = {
   },
 
   async getSession(): Promise<SessionUser | null> {
-    const cached = await secureGet<SessionUser>("profile");
     try {
       const user = await api<SessionUser | null>("/api/auth/session");
-      if (user) await secureSet("profile", user);
-      else await secureClear();
       return user;
     } catch {
-      return cached ?? null; // offline fallback to last-known (encrypted) profile
+      return null; // Only the server can confirm an authenticated session.
     }
   },
 

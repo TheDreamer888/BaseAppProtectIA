@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { authClient, type ProviderInfo, type SessionUser } from "../auth/authClient";
+import { runUnauthenticatedGuard } from "../lib/loginTabGuard";
 import "./LoginTab.css";
 
 const PROVIDER_ICONS: Record<string, string> = {
@@ -31,21 +32,28 @@ export default function LoginTab() {
     authClient.listProviders().then((res) => {
       setProviders(res.oauth);
       setPasskeyOk(res.webauthn && authClient.passkeySupported());
-    });
+    }).catch(() => setStatus("API de autenticação indisponível. Tenta novamente quando o serviço estiver configurado."));
     authClient.getSession().then(setSession);
   }, []);
 
   const legalOk = termsAccepted && privacyAccepted;
 
   const withGuard = async (action: () => Promise<void>) => {
-    if (!legalOk) {
+    if (!session && !legalOk) {
       setStatus("Aceita os Termos e a Política de Privacidade para continuar.");
       return;
     }
     setBusy(true);
     setStatus(null);
     try {
-      await action();
+      await runUnauthenticatedGuard(
+        Boolean(session),
+        termsAccepted,
+        privacyAccepted,
+        (terms, privacy) => authClient.recordConsent(terms, privacy),
+        action,
+      );
+      setSession(await authClient.getSession());
     } catch (err) {
       setStatus(err instanceof Error ? err.message : "Ocorreu um erro.");
     } finally {
@@ -82,7 +90,7 @@ export default function LoginTab() {
           >
             Gerar códigos de recuperação
           </button>
-          <button disabled={busy} onClick={() => authClient.logout().then(() => setSession(null))}>
+          <button disabled={busy} onClick={() => withGuard(() => authClient.logout())}>
             Terminar sessão
           </button>
         </div>
