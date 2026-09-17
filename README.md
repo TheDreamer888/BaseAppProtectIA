@@ -45,6 +45,9 @@ manifesto e ciclo de build.
 ### Frontend (`apps/frontend`)
 ```powershell
 pnpm --filter frontend dev
+pnpm --filter frontend test
+pnpm --filter frontend lint
+pnpm --filter frontend build
 ```
 
 ### API Python (`services/api-python`)
