@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { authClient, type ProviderInfo, type SessionUser } from "../auth/authClient";
+import { runUnauthenticatedGuard } from "../lib/loginTabGuard";
 import "./LoginTab.css";
 
 const PROVIDER_ICONS: Record<string, string> = {
@@ -45,7 +46,13 @@ export default function LoginTab() {
     setBusy(true);
     setStatus(null);
     try {
-      await action();
+      await runUnauthenticatedGuard(
+        Boolean(session),
+        termsAccepted,
+        privacyAccepted,
+        (terms, privacy) => authClient.recordConsent(terms, privacy),
+        action,
+      );
       setSession(await authClient.getSession());
     } catch (err) {
       setStatus(err instanceof Error ? err.message : "Ocorreu um erro.");
