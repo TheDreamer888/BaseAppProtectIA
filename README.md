@@ -1,6 +1,20 @@
 # Aegis
 
-Monorepo organizado em três áreas: `apps/`, `services/` e `infra/`.
+Monorepo do ProtectIA, organizado por responsabilidade: interface em `apps/`,
+APIs em `services/` e automações em `infra/`.
+
+## Mapa do projeto
+
+| Caminho | Responsabilidade | Porta |
+| --- | --- | ---: |
+| `apps/frontend` | React, Vite, TypeScript e autenticação | `5173` |
+| `services/api-python` | API principal FastAPI, DNS e risco | `8000` |
+| `services/api-rust` | Serviço Axum com PostgreSQL | `3000` |
+| `services/api-dotnet/WebApplication1` | API ASP.NET .NET 10 | `8080` |
+| `infra/scripts` | Scripts de manutenção e validação | - |
+
+Cada serviço mantém seu próprio ciclo de build e manifesto. O workspace pnpm
+gerencia apenas `apps/*`; Docker Compose integra a stack local.
 
 ## Estrutura
 
@@ -36,9 +50,8 @@ pnpm run check:rust
 pnpm run check:dotnet
 ```
 
-Os comandos `check:*` dependem do SDK correspondente instalado no ambiente. O
-workspace pnpm gerencia somente `apps/*`; cada serviço mantém o próprio
-manifesto e ciclo de build.
+Os comandos `check:*` dependem do SDK correspondente instalado no ambiente.
+Para instalações reproduzíveis, use `pnpm run install:ci`.
 
 ## Como executar cada serviço
 
@@ -78,6 +91,14 @@ Python em `http://localhost:8000`, API Rust em `http://localhost:3000` e API
 
 ## Variáveis de ambiente
 
-Copie `.env.example` e `.env.auth.example` para os serviços que precisar. Nunca
-faça commit de ficheiros `.env` reais.
+Use `.env.example` como referência para a stack e `.env.auth.example` para os
+provedores de autenticação. Arquivos `.env` reais devem permanecer locais.
+
+## Convenções
+
+- Código de cada serviço fica dentro do seu diretório e não compartilha
+  dependências entre linguagens.
+- Artefatos de build, caches, modelos e segredos são ignorados pelo Git.
+- Mudanças no frontend passam por lint e build; mudanças em um serviço passam
+  pelo respectivo comando `check:*`.
 

@@ -47,7 +47,10 @@ async fn main() -> Result<(), sqlx::Error> {
         .with_state(state);
 
     let port: u16 = std::env::var("PORT").ok().and_then(|p| p.parse().ok()).unwrap_or(3000);
-    let addr = SocketAddr::from(([0, 0, 0, 0], port));
+    let host = std::env::var("HOST").unwrap_or_else(|_| "0.0.0.0".to_string());
+    let addr: SocketAddr = format!("{host}:{port}")
+        .parse()
+        .expect("HOST ou PORT inválidos");
     tracing::info!("Servidor Rust em http://{}", addr);
 
     let listener = tokio::net::TcpListener::bind(addr).await.expect("falha ao vincular porta");

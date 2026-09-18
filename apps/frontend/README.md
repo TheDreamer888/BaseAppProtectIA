@@ -1,11 +1,30 @@
-# React + TypeScript + Vite
+# Frontend Aegis
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+Cliente web do Aegis, construído com React 19, Vite e TypeScript.
 
 Currently, two official plugins are available:
 
 - [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
 - [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+
+## Desenvolvimento
+
+Na raiz do monorepo:
+
+```powershell
+pnpm install
+pnpm --filter frontend dev
+```
+
+O frontend fica disponível em `http://localhost:5173`. Para apontar para outra
+API, defina `VITE_API_BASE_URL`; o padrão é `http://localhost:8000`.
+
+## Verificações
+
+```powershell
+pnpm --filter frontend lint
+pnpm --filter frontend build
+```
 
 ## React Compiler
 

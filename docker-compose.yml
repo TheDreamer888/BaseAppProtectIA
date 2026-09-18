@@ -44,6 +44,13 @@ services:
       CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:5173}
     ports:
       - "127.0.0.1:8000:8000"
+    read_only: true
+    tmpfs:
+      - /tmp:noexec,nosuid,size=64m
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
     depends_on:
       postgres:
         condition: service_healthy
@@ -58,6 +65,13 @@ services:
       PORT: 3000
     ports:
       - "127.0.0.1:3000:3000"
+    read_only: true
+    tmpfs:
+      - /tmp:noexec,nosuid,size=64m
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
     depends_on:
       postgres:
         condition: service_healthy
@@ -68,6 +82,13 @@ services:
     restart: unless-stopped
     ports:
       - "127.0.0.1:8080:8080"
+    read_only: true
+    tmpfs:
+      - /tmp:noexec,nosuid,size=64m
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
     environment:
       ASPNETCORE_ENVIRONMENT: ${ASPNETCORE_ENVIRONMENT:-Development}
       Cors__AllowedOrigins: ${CORS_ORIGINS:-http://localhost:5173}
@@ -79,6 +100,15 @@ services:
     restart: unless-stopped
     ports:
       - "127.0.0.1:5173:80"
+    read_only: true
+    tmpfs:
+      - /var/cache/nginx:noexec,nosuid,size=32m
+      - /var/run:noexec,nosuid,size=8m
+      - /tmp:noexec,nosuid,size=8m
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
     depends_on:
       api-python:
         condition: service_started

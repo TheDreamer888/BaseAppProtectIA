@@ -45,7 +45,7 @@ a validade/expiração dos certificados TLS dos domínios usados pela app
 (`PUBLIC_API_URL`, `PUBLIC_FRONTEND_URL`, domínio Cloudflare):
 
 ```powershell
-python ../../infra/scripts/check-cert-expiry.py api.exemplo.com app.exemplo.com
+python3 ../../infra/scripts/check-cert-expiry.py api.exemplo.com app.exemplo.com
 ```
 
 Alerta (exit code != 0) quando um certificado expira em menos de 15 dias.

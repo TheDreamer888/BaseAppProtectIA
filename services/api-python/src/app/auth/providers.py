@@ -11,8 +11,8 @@ To add another provider ("todas as alternativas"), add an entry to
 """
 from __future__ import annotations
 
+import os
 from dataclasses import dataclass
-from src.app.config import env
 
 
 @dataclass(frozen=True)
@@ -50,8 +50,8 @@ def _provider(
         token_url=token_url,
         userinfo_url=userinfo_url,
         scope=scope,
-        client_id=env(f"{prefix}_CLIENT_ID"),
-        client_secret=env(f"{prefix}_CLIENT_SECRET"),
+        client_id=os.getenv(f"{prefix}_CLIENT_ID"),
+        client_secret=os.getenv(f"{prefix}_CLIENT_SECRET"),
         id_field=id_field,
         email_field=email_field,
         name_field=name_field,

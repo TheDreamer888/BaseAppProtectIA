@@ -9,10 +9,11 @@ from __future__ import annotations
 from typing import Any, Literal
 
 import httpx
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Request
 from pydantic import BaseModel, Field
 
 from src.app.config import settings
+from src.app.auth.routes import _current_user
 from src.pylibrary.logging import get_logger
 
 logger = get_logger(__name__)
@@ -50,6 +51,11 @@ def _require_config() -> tuple[str, str]:
     return settings.cloudflare_api_token, settings.cloudflare_zone_id
 
 
+def _require_user(request: Request) -> None:
+    if not _current_user(request):
+        raise HTTPException(status_code=401, detail="Autentica-te para gerir DNS.")
+
+
 def _client(token: str) -> httpx.AsyncClient:
     return httpx.AsyncClient(
         base_url=CLOUDFLARE_API_BASE,
@@ -68,8 +74,9 @@ async def _raise_on_cf_error(resp: httpx.Response) -> dict[str, Any]:
 
 
 @router.get("/records")
-async def list_records(name: str | None = None, type: str | None = None) -> dict[str, Any]:
+async def list_records(request: Request, name: str | None = None, type: str | None = None) -> dict[str, Any]:
     """Lista os registos DNS da zona configurada, com filtros opcionais."""
+    _require_user(request)
     token, zone_id = _require_config()
     params = {k: v for k, v in {"name": name, "type": type}.items() if v}
     async with _client(token) as client:
@@ -79,8 +86,9 @@ async def list_records(name: str | None = None, type: str | None = None) -> dict
 
 
 @router.post("/records", status_code=201)
-async def create_record(record: DNSRecordIn) -> dict[str, Any]:
+async def create_record(request: Request, record: DNSRecordIn) -> dict[str, Any]:
     """Cria um novo registo DNS na zona configurada."""
+    _require_user(request)
     token, zone_id = _require_config()
     async with _client(token) as client:
         resp = await client.post(f"/zones/{zone_id}/dns_records", json=record.model_dump())
@@ -90,8 +98,9 @@ async def create_record(record: DNSRecordIn) -> dict[str, Any]:
 
 
 @router.patch("/records/{record_id}")
-async def update_record(record_id: str, record: DNSRecordUpdate) -> dict[str, Any]:
+async def update_record(request: Request, record_id: str, record: DNSRecordUpdate) -> dict[str, Any]:
     """Atualiza parcialmente um registo DNS existente."""
+    _require_user(request)
     token, zone_id = _require_config()
     payload = record.model_dump(exclude_none=True)
     if not payload:
@@ -104,8 +113,9 @@ async def update_record(record_id: str, record: DNSRecordUpdate) -> dict[str, An
 
 
 @router.delete("/records/{record_id}")
-async def delete_record(record_id: str) -> dict[str, Any]:
+async def delete_record(request: Request, record_id: str) -> dict[str, Any]:
     """Remove um registo DNS."""
+    _require_user(request)
     token, zone_id = _require_config()
     async with _client(token) as client:
         resp = await client.delete(f"/zones/{zone_id}/dns_records/{record_id}")
