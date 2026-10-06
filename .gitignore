@@ -1,6 +1,66 @@
-# ============================
-# PYTHON
-# ============================
+# ==========================================
+# BaseAppProtectIA
+# ==========================================
+
+# --- ENV / SECRETS ---
+.env
+.env.*
+*.env
+!.env.example
+
+secrets/
+keys/
+credentials/
+credentials.json
+
+secrets.json
+secret_*.json
+auth.json
+token.json
+tokens.json
+
+config.local.*
+config.local.json
+config/*.local.json
+*.local.json
+
+# --- CERTIFICATES / SSH KEYS ---
+*.key
+*.pem
+*.crt
+*.p12
+*.pfx
+
+id_rsa
+id_rsa.pub
+id_ed25519
+id_ed25519.pub
+
+# --- NODE / TYPESCRIPT ---
+node_modules/
+.pnpm-store/
+
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# --- BUILDS ---
+build/
+dist/
+out/
+.next/
+.nuxt/
+.turbo/
+.artifacts/
+*.tgz
+
+# Rust / compiled targets
+services/api-rust/target/
+**/target/
+**/obj/
+
+# --- PYTHON ---
 __pycache__/
 *.py[cod]
 *.pyo
@@ -9,94 +69,63 @@ __pycache__/
 *.egg-info/
 *.egg
 *.whl
-
-# ============================
-# BUILD / DIST
-# ============================
-build/
-dist/
 *.spec
 
-# ============================
-# VIRTUAL ENVIRONMENTS
-# ============================
+# Python environments
 .venv/
 venv/
 env/
 env*/
 venv*/
 
-# ============================
-# ENVIRONMENT / SECRETS
-# ============================
-.env
-.env.*
-*.env
-secrets.json
-secret_*.json
-config.local.json
-config/*.local.json
-*.key
-*.pem
-*.crt
-*.pfx
+# Python tests / tooling
+.pytest_cache/
+pytest_cache/
+.mypy_cache/
+.tox/
+.coverage
+coverage.xml
+htmlcov/
 
-# ============================
-# LOGS / RUNTIME
-# ============================
+# --- LOGS / RUNTIME ---
 *.log
 logs/
 *.out
 *.err
 
-# ============================
-# CACHE / TEMP
-# ============================
+filtro.log
+filtro-deus.log
+
+# --- CACHE / TEMP ---
 .cache/
 tmp/
 temp/
 *.tmp
 *.bak
+*.backup
+*.old
+*.swp
 
-# ============================
-# JUPYTER / NOTEBOOKS
-# ============================
-.ipynb_checkpoints/
-*.ipynb~
+# --- DATABASES ---
+*.db
+*.sqlite
+*.sqlite3
 
-# ============================
-# EDITORS / IDEs
-# ============================
-.vscode/
-.vscode/.history/
-.idea/
-*.code-workspace
-
-# ============================
-# TESTS / COVERAGE
-# ============================
-.coverage
-coverage.xml
-htmlcov/
-pytest_cache/
-.tox/
-
-# ============================
-# MACHINE LEARNING / IA
-# ============================
-# Modelos pesados
+# --- MACHINE LEARNING / AI ---
 models/
 checkpoints/
 artifacts/
+
 *.h5
 *.pt
 *.pth
 *.onnx
 *.tflite
 
-# Dados grandes
+# --- LARGE DATASETS ---
 data/
 datasets/
+
 *.csv
 *.tsv
 *.parquet
@@ -105,20 +134,29 @@ datasets/
 *.npy
 *.npz
 
-# ============================
-# ONE DRIVE / WINDOWS LIXO
-# ============================
-desktop.ini
+# --- JUPYTER ---
+.ipynb_checkpoints/
+*.ipynb~
+
+# --- TERMUX / ANDROID LOCAL ---
+storage/
+.termux/
+termux.properties
+
+# --- IDE ---
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.example.json
+
+.idea/
+*.code-workspace
+
+# --- OS JUNK ---
+.DS_Store
 Thumbs.db
 ehthumbs.db
+desktop.ini
 Icon?
-node_modules/
-services/api-rust/target/
-**/obj/
-**/target/
-.artifacts/
-*.tgz
 
-
-
-
+# --- LOCAL DOCKER OVERRIDE ---
+docker-compose.override.yml
