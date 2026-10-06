@@ -1,0 +1,150 @@
+name: baseappprotectia
+
+services:
+  postgres:
+    image: postgres:16.4-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-protectia}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD required}
+      POSTGRES_DB: ${POSTGRES_DB:-protectia}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - data
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    security_opt:
+      - no-new-privileges:true
+
+  redis:
+    image: redis:7.4.2-alpine
+    restart: unless-stopped
+    command:
+      - redis-server
+      - --appendonly
+      - "yes"
+      - --requirepass
+      - ${REDIS_PASSWORD:?REDIS_PASSWORD required}
+    volumes:
+      - redis_data:/data
+    networks:
+      - data
+    healthcheck:
+      test:
+        - CMD
+        - redis-cli
+        - -a
+        - ${REDIS_PASSWORD}
+        - ping
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    security_opt:
+      - no-new-privileges:true
+
+  api-python:
+    image: ghcr.io/thedreamer888/baseappprotectia-api-python:${VERSION:-latest}
+    restart: unless-stopped
+    environment:
+      ENV: production
+      DEBUG: "false"
+      DATABASE_URL: postgresql://${POSTGRES_USER:-protectia}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-protectia}
+      REDIS_URL: redis://:${REDIS_PASSWORD}@redis:6379/0
+    networks:
+      - backend
+      - data
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    read_only: true
+    tmpfs:
+      - /tmp
+    security_opt:
+      - no-new-privileges:true
+
+  api-rust:
+    image: ghcr.io/thedreamer888/baseappprotectia-api-rust:${VERSION:-latest}
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgres://${POSTGRES_USER:-protectia}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-protectia}
+      REDIS_URL: redis://:${REDIS_PASSWORD}@redis:6379
+      PORT: "3000"
+    networks:
+      - backend
+      - data
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    read_only: true
+    tmpfs:
+      - /tmp
+    security_opt:
+      - no-new-privileges:true
+
+  api-dotnet:
+    image: ghcr.io/thedreamer888/baseappprotectia-api-dotnet:${VERSION:-latest}
+    restart: unless-stopped
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+    networks:
+      - backend
+      - data
+    security_opt:
+      - no-new-privileges:true
+
+  malware-scanner:
+    image: ghcr.io/thedreamer888/baseappprotectia-malware-scanner:${VERSION:-latest}
+    restart: unless-stopped
+    volumes:
+      - scan_data:/data:ro
+    networks:
+      - security
+    read_only: true
+    tmpfs:
+      - /tmp
+    security_opt:
+      - no-new-privileges:true
+
+  frontend:
+    image: ghcr.io/thedreamer888/baseappprotectia-frontend:${VERSION:-latest}
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8088:80"
+    networks:
+      - public
+      - backend
+    depends_on:
+      - api-python
+      - api-rust
+      - api-dotnet
+    read_only: true
+    tmpfs:
+      - /var/cache/nginx
+      - /var/run
+      - /tmp
+    security_opt:
+      - no-new-privileges:true
+
+networks:
+  public:
+  backend:
+    internal: true
+  data:
+    internal: true
+  security:
+    internal: true
+
+volumes:
+  postgres_data:
+  redis_data:
+  scan_data:
