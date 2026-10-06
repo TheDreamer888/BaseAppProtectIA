@@ -1,25 +1,53 @@
 packages:
-    - "apps/*"
-    - "services/*"
+  - "apps/*"
+  - "services/*"
+
+# Workspace
+sharedWorkspaceLockfile: true
+linkWorkspacePackages: false
+preferWorkspacePackages: false
+disallowWorkspaceCycles: true
+failIfNoMatch: true
+
+# Dependency resolution
 engineStrict: true
 saveExact: true
 strictPeerDependencies: true
 frozenLockfile: false
-sharedWorkspaceLockfile: true
+
+# Security / supply chain
 minimumReleaseAge: 1440
-strictSsl: true
-preferOffline: true
-audit:
-  level: moderate
-verifyStoreIntegrity: false
-strictStorePkgContentCheck: false
 blockExoticSubdeps: true
+trustPolicy: no-downgrade
+strictSsl: true
+
+# Integrity
+verifyStoreIntegrity: true
+strictStorePkgContentCheck: true
+verifyDepsBeforeRun: install
+
+# Install scripts: deny by default, allow only known packages
+ignoreScripts: true
 allowBuilds:
   esbuild: true
   sharp: true
-verifyDepsBeforeRun: false
-ignoreScripts: false
-manage-package-manager-versions: false
+
+# Cache / reproducibility
+preferOffline: true
+
+# Security audit policy
+audit:
+  level: moderate
+
+# Native architectures used by this project
 supportedArchitectures:
-  os: [linux, android]
-  cpu: [x64, arm64]
+  os:
+    - linux
+    - android
+  cpu:
+    - x64
+    - arm64
+
+# Patch vulnerable transitive dependency
+overrides:
+  source-map-js: 1.2.2
