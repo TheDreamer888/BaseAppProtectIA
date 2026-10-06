@@ -160,3 +160,12 @@ Icon?
 
 # --- LOCAL DOCKER OVERRIDE ---
 docker-compose.override.yml
+
+# SSH keys
+*.pub
+id_*
+Nexus
+Nexus.pub
+SeraZ
+SeraZ.pub
+

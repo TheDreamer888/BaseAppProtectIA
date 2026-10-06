@@ -1,0 +1,30 @@
+name: Docker Build
+
+on:
+  push:
+    branches:
+      - main
+      - feat/**
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  api-python:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Python image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./services/api-python
+          push: false
+          tags: baseappprotectia-python:test
