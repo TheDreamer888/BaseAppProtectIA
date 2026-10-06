@@ -169,10 +169,3 @@ Nexus.pub
 SeraZ
 SeraZ.pub
 
-# SSH keys
-*.pub
-id_*
-Nexus
-Nexus.pub
-SeraZ
-SeraZ.pub
