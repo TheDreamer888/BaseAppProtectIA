@@ -1,6 +1,7 @@
 {
   "name": "aegis-platform",
   "private": true,
+  "packageManager": "pnpm@10.15.1",
   "scripts": {
     "audit:security": "pnpm audit --audit-level high",
     "install:ci": "pnpm install --frozen-lockfile --ignore-scripts",

@@ -1,21 +1,24 @@
-# Security Policy
+# Política de segurança
 
-## Supported Versions
+## Reportar uma vulnerabilidade
 
-Use this section to tell people about which versions of your project are
-currently being supported with security updates.
+Se encontrar uma vulnerabilidade, exposição de segredo ou falha de configuração sensível:
 
-| Version | Supported          |
-| ------- | ------------------ |
-| 5.1.x   | :white_check_mark: |
-| 5.0.x   | :x:                |
-| 4.0.x   | :white_check_mark: |
-| < 4.0   | :x:                |
+- não abra issue pública com detalhes exploráveis
+- use o fluxo privado de segurança do GitHub, se estiver ativo
+- caso necessário, contacte o mantenedor do repositório em canal privado
 
-## Reporting a Vulnerability
+## Escopo
 
-Use this section to tell people how to report a vulnerability.
+Esta política cobre:
 
-Tell them where to go, how often they can expect to get an update on a
-reported vulnerability, what to expect if the vulnerability is accepted or
-declined, etc.
+- código das aplicações em `apps/` e `services/`
+- workflows em `.github/workflows/`
+- segredos, variáveis e integrações de infraestrutura
+
+## Boas práticas mínimas
+
+- manter secret scanning e push protection ativos
+- rever PRs com impacto em autenticação, CI e infraestrutura
+- validar alterações em workflows antes do merge
+- remover ou rodar qualquer segredo exposto imediatamente
