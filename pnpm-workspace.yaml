@@ -6,6 +6,8 @@ saveExact: true
 strictPeerDependencies: true
 frozenLockfile: false
 sharedWorkspaceLockfile: true
+overrides:
+  source-map-js: ^1.2.2
 minimumReleaseAge: 1440
 strictSsl: true
 preferOffline: true
