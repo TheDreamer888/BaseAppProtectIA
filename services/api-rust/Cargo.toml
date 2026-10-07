@@ -14,7 +14,7 @@ tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 thiserror = "1"
 sqlx = { version = "0.8", features = ["postgres", "runtime-tokio", "chrono", "uuid"] }
 jsonwebtoken = "9"
-argon2 = "0.5"
+argon2 = "0.6"
 uuid = { version = "1", features = ["v4", "serde"] }
 chrono = { version = "0.4", features = ["serde"] }
 redis = { version = "0.27", features = ["tokio-comp", "connection-manager"] }
