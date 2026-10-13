@@ -48,12 +48,15 @@
     <main id="main">
       <!-- 01 · HERO -->
       <section class="stage hero" aria-labelledby="hero-title">
-        <div class="stars" aria-hidden="true"></div>
-        <div class="stars stars-far" aria-hidden="true"></div>
-        <div class="planet" aria-hidden="true"><div class="atmosphere"></div></div>
-        <div class="orbit-ring" aria-hidden="true"><i class="satellite"></i></div>
+        <div class="letterbox" aria-hidden="true"></div>
+        <div class="layer" style="--d: 6" aria-hidden="true"><div class="stars stars-far"></div></div>
+        <div class="layer" style="--d: 14" aria-hidden="true"><div class="stars"></div></div>
+        <div class="layer" style="--d: 22" aria-hidden="true"><div class="sun"></div></div>
+        <div class="layer" style="--d: 34" aria-hidden="true"><div class="planet"><div class="atmosphere"></div></div></div>
+        <div class="layer" style="--d: 56" aria-hidden="true"><div class="orbit-ring"><i class="satellite"></i></div></div>
+        <div class="spot" aria-hidden="true"></div>
 
-        <div class="stage-copy">
+        <div class="stage-copy layer-copy" style="--d: -10">
           <p class="kicker reveal">Missão 01 · Privacidade por definição</p>
           <h1 id="hero-title" class="display reveal">Defesa<br />em órbita.</h1>
           <p class="lead reveal">
@@ -131,8 +134,11 @@
       <!-- 04 · EDUCAÇÃO -->
       <section class="stage panel panel-educacao" id="educacao" aria-labelledby="educacao-title">
         <div class="art orbits" aria-hidden="true">
-          <i class="o o1"><b></b></i><i class="o o2"><b></b></i><i class="o o3"><b></b></i>
-          <span class="core"></span>
+          <div class="system">
+            <i class="o o1"><b></b></i><i class="o o2"><b></b></i><i class="o o3"><b></b></i>
+            <i class="o o4"><b><s></s></b></i>
+            <span class="core"></span>
+          </div>
         </div>
         <div class="stage-copy">
           <p class="kicker reveal">Missão 04 · Educação</p>
@@ -152,8 +158,9 @@
 
       <!-- 05 · PRIVACIDADE -->
       <section class="stage finale" id="privacidade" aria-labelledby="privacidade-title">
-        <div class="stars" aria-hidden="true"></div>
-        <div class="eclipse" aria-hidden="true"></div>
+        <div class="layer" style="--d: 10" aria-hidden="true"><div class="stars"></div></div>
+        <div class="layer" style="--d: 26" aria-hidden="true"><div class="eclipse"></div></div>
+        <div class="spot" aria-hidden="true"></div>
         <div class="stage-copy center">
           <p class="kicker reveal">Missão 05 · Privacidade</p>
           <h2 id="privacidade-title" class="display reveal">O teu espaço.<br />Os teus dados.</h2>

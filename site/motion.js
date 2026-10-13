@@ -35,6 +35,36 @@
     }).observe(hero)
   }
 
+  // Parallax com o rato: só em ponteiros finos e sem movimento reduzido.
+  // O ciclo de animação só existe enquanto o rato se mexe e para quando
+  // estabiliza; as variáveis só são escritas nas secções visíveis.
+  const calm = matchMedia('(prefers-reduced-motion: reduce)')
+  const fine = matchMedia('(hover: hover) and (pointer: fine)')
+  let tx = 0, ty = 0, x = 0, y = 0, px = innerWidth / 2, py = innerHeight / 2, frame = 0
+
+  const step = () => {
+    x += (tx - x) * 0.08
+    y += (ty - y) * 0.08
+    for (const s of document.querySelectorAll('.stage.live')) {
+      const r = s.getBoundingClientRect()
+      s.style.setProperty('--mx', x.toFixed(4))
+      s.style.setProperty('--my', y.toFixed(4))
+      s.style.setProperty('--px', `${Math.round(px - r.left)}px`)
+      s.style.setProperty('--py', `${Math.round(py - r.top)}px`)
+    }
+    frame = Math.abs(tx - x) + Math.abs(ty - y) > 0.002 ? requestAnimationFrame(step) : 0
+  }
+
+  addEventListener('pointermove', (ev) => {
+    if (calm.matches || !fine.matches || ev.pointerType !== 'mouse') return
+    px = ev.clientX
+    py = ev.clientY
+    tx = (ev.clientX / innerWidth) * 2 - 1
+    ty = (ev.clientY / innerHeight) * 2 - 1
+    root.classList.add('pointer')
+    if (!frame) frame = requestAnimationFrame(step)
+  }, { passive: true })
+
   // Fechar o menu móvel ao escolher um destino, com Escape ou ao tocar fora.
   const menu = document.querySelector('.menu')
   if (menu) {
