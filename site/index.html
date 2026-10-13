@@ -2,96 +2,181 @@
 <html lang="pt">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="color-scheme" content="light dark" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="color-scheme" content="dark" />
+    <meta name="theme-color" content="#000000" />
     <meta name="referrer" content="no-referrer" />
     <meta name="description" content="Aegis — segurança defensiva, mercados e conhecimento num workspace com privacidade por definição." />
-    <meta property="og:title" content="Aegis" />
+    <meta property="og:title" content="Aegis — Defesa em órbita" />
     <meta property="og:description" content="Segurança defensiva, mercados e conhecimento num workspace com privacidade por definição." />
     <meta property="og:type" content="website" />
     <meta property="og:image" content="hero.svg" />
     <link rel="icon" type="image/svg+xml" href="hero.svg" />
     <link rel="stylesheet" href="landing.css" />
+    <script src="motion.js" defer></script>
     <title>Aegis</title>
   </head>
   <body>
     <a class="skip" href="#main">Saltar para o conteúdo</a>
 
-    <div class="wrap">
-      <header class="top">
-        <a class="brand" href="./"><img src="hero.svg" alt="" width="28" height="28" />Aegis</a>
-        <nav aria-label="Principal">
-          <a href="#defesa">Defesa</a>
-          <a href="#mercados">Mercados</a>
-          <a href="#educacao">Educação</a>
-          <a class="keep" href="app/">Abrir workspace</a>
-        </nav>
-      </header>
-    </div>
+    <header class="nav" id="top">
+      <a class="wordmark" href="./" aria-label="Aegis, início">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2 21 5.5v6.2c0 5.3-3.7 8.9-9 10.3C6.7 20.6 3 17 3 11.7V5.5z" /></svg>
+        AEGIS
+      </a>
+      <nav aria-label="Principal">
+        <ul class="nav-links">
+          <li><a href="#defesa">Defesa</a></li>
+          <li><a href="#mercados">Mercados</a></li>
+          <li><a href="#educacao">Educação</a></li>
+          <li><a href="#privacidade">Privacidade</a></li>
+        </ul>
+      </nav>
+      <a class="btn btn-ghost nav-cta" href="app/">Abrir workspace</a>
+      <details class="menu">
+        <summary aria-label="Abrir menu"><span></span><span></span></summary>
+        <ul>
+          <li><a href="#defesa">Defesa</a></li>
+          <li><a href="#mercados">Mercados</a></li>
+          <li><a href="#educacao">Educação</a></li>
+          <li><a href="#privacidade">Privacidade</a></li>
+          <li><a href="app/">Abrir workspace →</a></li>
+        </ul>
+      </details>
+    </header>
 
     <main id="main">
-      <div class="wrap hero">
-        <div>
-          <span class="eyebrow">Privacidade por definição</span>
-          <h1>Um workspace para proteger, aprender e decidir com calma.</h1>
-          <p class="lead">
-            Revisão local de texto suspeito, ferramentas educativas de finanças e percursos de
-            aprendizagem — tudo no teu navegador, sem anúncios, sem análise e sem fontes remotas.
+      <!-- 01 · HERO -->
+      <section class="stage hero" aria-labelledby="hero-title">
+        <div class="stars" aria-hidden="true"></div>
+        <div class="stars stars-far" aria-hidden="true"></div>
+        <div class="planet" aria-hidden="true"><div class="atmosphere"></div></div>
+        <div class="orbit-ring" aria-hidden="true"><i class="satellite"></i></div>
+
+        <div class="stage-copy">
+          <p class="kicker reveal">Missão 01 · Privacidade por definição</p>
+          <h1 id="hero-title" class="display reveal">Defesa<br />em órbita.</h1>
+          <p class="lead reveal">
+            Um workspace que protege, ensina e ajuda a decidir — inteiramente no teu navegador.
+            Sem anúncios. Sem rastreio. Sem fontes remotas.
           </p>
-          <div class="actions">
-            <a class="btn primary" href="app/">Abrir workspace</a>
-            <a class="btn" href="#defesa">Saber mais</a>
+          <div class="actions reveal">
+            <a class="btn btn-solid" href="app/">Lançar workspace</a>
+            <a class="btn btn-ghost" href="#defesa">Ver a missão</a>
           </div>
         </div>
-        <img src="hero.svg" alt="Escudo Aegis com um sinal de verificação" width="440" height="440" />
-      </div>
 
-      <section class="block" id="defesa">
-        <div class="wrap">
-          <h2>Defesa</h2>
-          <p>Revisão estática de scripts e texto, feita localmente. O que colas nunca é executado nem enviado.</p>
-          <div class="grid">
-            <article class="card"><h3>Revisão local</h3><p>Deteção por padrões de execução remota, ofuscação e downloads sem verificação.</p></article>
-            <article class="card"><h3>Diário em memória</h3><p>Opcional, exportável e apagável. Ao recarregar, desaparece.</p></article>
-            <article class="card"><h3>Sem execução</h3><p>Nenhum comando submetido é executado. Os padrões não são prova de segurança.</p></article>
-          </div>
+        <a class="scroll-cue" href="#telemetria" aria-label="Descer para a telemetria"><span></span></a>
+      </section>
+
+      <!-- TELEMETRIA -->
+      <section class="telemetry" id="telemetria" aria-label="Telemetria do workspace">
+        <dl>
+          <div><dt>Rastreadores</dt><dd>0</dd></div>
+          <div><dt>Análise</dt><dd>100<small>%</small></dd><span>local</span></div>
+          <div><dt>Fontes remotas</dt><dd>0</dd></div>
+          <div><dt>Texto enviado</dt><dd>0<small>B</small></dd></div>
+        </dl>
+      </section>
+
+      <!-- 02 · DEFESA -->
+      <section class="stage panel panel-defesa" id="defesa" aria-labelledby="defesa-title">
+        <div class="art radar" aria-hidden="true">
+          <div class="radar-grid"></div>
+          <div class="radar-sweep"></div>
+          <i class="blip b1"></i><i class="blip b2"></i><i class="blip b3"></i>
+        </div>
+        <div class="stage-copy">
+          <p class="kicker reveal">Missão 02 · Defesa</p>
+          <h2 id="defesa-title" class="display reveal">Vê o sinal<br />antes do impacto.</h2>
+          <p class="lead reveal">
+            Revisão estática de scripts e registos, feita localmente. Deteta execução remota,
+            ofuscação e downloads sem verificação — e explica porquê. O que colas nunca é executado nem enviado.
+          </p>
+          <ul class="specs reveal">
+            <li><b>Local</b><span>Nada sai do dispositivo</span></li>
+            <li><b>Explicável</b><span>Cada sinal com contexto</span></li>
+            <li><b>Honesto</b><span>Padrões não são prova de segurança</span></li>
+          </ul>
+          <a class="btn btn-ghost reveal" href="app/">Abrir central de defesa</a>
         </div>
       </section>
 
-      <section class="block" id="mercados">
-        <div class="wrap">
-          <h2>Mercados</h2>
-          <p>Ferramentas educativas para perceber risco, prazo e custos antes de qualquer decisão.</p>
-          <div class="grid">
-            <article class="card"><h3>Calculadora de posição</h3><p>Dimensiona o risco por operação com valores teus, só para aprender.</p></article>
-            <article class="card"><h3>Catálogo de integrações</h3><p>Visão do que poderá ligar-se no futuro, sempre com limites e quotas.</p></article>
-          </div>
-          <p class="note">Conteúdo educativo. Não é aconselhamento financeiro nem garante lucros.</p>
+      <!-- 03 · MERCADOS -->
+      <section class="stage panel panel-mercados panel-right" id="mercados" aria-labelledby="mercados-title">
+        <div class="art trajectory" aria-hidden="true">
+          <svg viewBox="0 0 600 400" preserveAspectRatio="none">
+            <defs>
+              <linearGradient id="trail" x1="0" x2="1">
+                <stop offset="0" stop-color="#fff" stop-opacity="0" />
+                <stop offset="1" stop-color="#fff" stop-opacity=".9" />
+              </linearGradient>
+            </defs>
+            <path class="grid-line" d="M0 100H600M0 200H600M0 300H600" />
+            <path class="path" pathLength="1" d="M0 360 C120 340 160 250 240 260 S360 300 420 190 520 80 600 40" stroke="url(#trail)" />
+          </svg>
+        </div>
+        <div class="stage-copy">
+          <p class="kicker reveal">Missão 03 · Mercados</p>
+          <h2 id="mercados-title" class="display reveal">Simula a trajetória.<br />Antes do risco.</h2>
+          <p class="lead reveal">
+            Um simulador de posição com custos de entrada e saída, para aprender com cenários e não com promessas.
+            Sem capital real, sem ordens, sem cotações inventadas.
+          </p>
+          <p class="fine reveal">Conteúdo educativo. Não é aconselhamento financeiro nem garante resultados.</p>
+          <a class="btn btn-ghost reveal" href="app/">Abrir simulador</a>
         </div>
       </section>
 
-      <section class="block" id="educacao">
-        <div class="wrap">
-          <h2>Educação</h2>
-          <p>Percursos do 5.º ano à faculdade, com literacia financeira e segurança online.</p>
-          <div class="grid">
-            <article class="card"><h3>Fundamentos</h3><p>Matemática, ciências, leitura e cidadania digital.</p></article>
-            <article class="card"><h3>Preparação</h3><p>Exames, projetos, carreira e finanças pessoais.</p></article>
-            <article class="card"><h3>Especialização</h3><p>Competências profissionais e aprendizagem autónoma.</p></article>
+      <!-- 04 · EDUCAÇÃO -->
+      <section class="stage panel panel-educacao" id="educacao" aria-labelledby="educacao-title">
+        <div class="art orbits" aria-hidden="true">
+          <i class="o o1"><b></b></i><i class="o o2"><b></b></i><i class="o o3"><b></b></i>
+          <span class="core"></span>
+        </div>
+        <div class="stage-copy">
+          <p class="kicker reveal">Missão 04 · Educação</p>
+          <h2 id="educacao-title" class="display reveal">Do 5.º ano<br />à faculdade.</h2>
+          <p class="lead reveal">
+            Percursos de segurança digital, literacia financeira e APIs com privacidade.
+            Lições curtas, perguntas diretas e um guia que nunca envia as tuas perguntas para fora.
+          </p>
+          <ul class="specs reveal">
+            <li><b>Fundamentos</b><span>Cidadania digital</span></li>
+            <li><b>Preparação</b><span>Finanças pessoais</span></li>
+            <li><b>Especialização</b><span>Autonomia</span></li>
+          </ul>
+          <a class="btn btn-ghost reveal" href="app/">Começar a aprender</a>
+        </div>
+      </section>
+
+      <!-- 05 · PRIVACIDADE -->
+      <section class="stage finale" id="privacidade" aria-labelledby="privacidade-title">
+        <div class="stars" aria-hidden="true"></div>
+        <div class="eclipse" aria-hidden="true"></div>
+        <div class="stage-copy center">
+          <p class="kicker reveal">Missão 05 · Privacidade</p>
+          <h2 id="privacidade-title" class="display reveal">O teu espaço.<br />Os teus dados.</h2>
+          <p class="lead reveal">
+            Privacidade não é uma opção premium. É a base: sem analytics publicitários, pixels ou gravação de sessões.
+          </p>
+          <div class="actions reveal">
+            <a class="btn btn-solid" href="app/">Lançar workspace</a>
+            <a class="btn btn-ghost" href="app/legal/privacy.html">Política de privacidade</a>
           </div>
         </div>
       </section>
     </main>
 
-    <footer>
-      <div class="wrap">
-        <span>© Aegis · Projeto em desenvolvimento</span>
-        <span>
-          <a href="app/legal/privacy.html">Privacidade</a> ·
-          <a href="app/legal/terms.html">Termos</a> ·
-          <a href="https://github.com/TheDreamer888/BaseAppProtectIA">GitHub</a>
-        </span>
-      </div>
+    <footer class="footer">
+      <span class="wordmark small">AEGIS</span>
+      <ul>
+        <li><a href="app/legal/privacy.html">Privacidade</a></li>
+        <li><a href="app/legal/terms.html">Termos</a></li>
+        <li><a href="https://github.com/TheDreamer888/BaseAppProtectIA">GitHub</a></li>
+        <li><a href="#top">Voltar ao topo ↑</a></li>
+      </ul>
+      <small>© Aegis · Projeto em desenvolvimento</small>
     </footer>
   </body>
 </html>
